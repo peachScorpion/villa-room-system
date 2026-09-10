@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>别墅智能分房系统 · 交互原型</title>
+<style>
+  :root {
+    --primary: #4f5ae8;
+    --primary-strong: #3d47d8;
+    --primary-soft: #eef0ff;
+    --gold: #e8a23d;
+    --gold-strong: #d18f1f;
+    --gold-soft: #fdf3e2;
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --line: #eceef3;
+    --line-2: #dfe3ea;
+    --text: #1f2430;
+    --muted: #8a93a3;
+    --green: #2f9e6e;
+    --red: #e05252;
+    --shadow-sm: 0 1px 2px rgba(30,40,80,.04), 0 3px 10px rgba(30,40,80,.04);
+    --shadow: 0 2px 6px rgba(30,40,80,.05), 0 10px 28px rgba(30,40,80,.07);
+    --shadow-lg: 0 18px 50px rgba(20,30,70,.22);
+    font-size: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* 顶栏 —— 白色轻量 */
+  .topbar { height: 62px; background: #fff; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 24px; gap: 18px; flex: 0 0 62px; z-index: 10; }
+  .logo { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 11px; color: var(--text); letter-spacing: -.2px; }
+  .logo .ico { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, var(--primary), #7a83ff); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 12px rgba(79,90,232,.28); }
+  .crumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .crumbs b { color: var(--text); font-weight: 600; }
+  .crumbs .sep { opacity: .5; }
+  .topbar .spacer { flex: 1; }
+  .activity-select { background: var(--bg); border: 1px solid var(--line-2); color: var(--text); border-radius: 9px; padding: 8px 13px; font-size: 13px; outline: none; cursor: pointer; }
+  .btn { border: none; border-radius: 10px; padding: 10px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: .15s; display: inline-flex; align-items: center; gap: 7px; }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 16px rgba(79,90,232,.24); }
+  .btn-primary:hover { background: var(--primary-strong); }
+  .btn-back { background: transparent; color: var(--text); border: 1px solid var(--line-2); }
+  .btn-back:hover { background: #f5f6fa; }
+
+  .workspace { flex: 1; display: flex; overflow: hidden; }
+  .page-view { flex: 1; overflow-y: auto; background: var(--bg); padding: 28px 34px; }
+  .view-inner { max-width: 1000px; margin: 0 auto; }
+  .page-title { font-size: 21px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin: 6px 0 22px; }
+
+  /* ===== 左栏 ===== */
+  .col-left { flex: 0 0 264px; background: #fff; border-right: 1px solid var(--line); padding: 22px 18px; overflow-y: auto; }
+  .panel-title { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 9px; margin-bottom: 14px; letter-spacing: -.1px; }
+  .panel-title .dot { width: 8px; height: 8px; border-radius: 3px; background: var(--primary); }
+  .owner-card { background: linear-gradient(135deg, var(--primary), #727bff); color: #fff; border-radius: 15px; padding: 18px; margin-bottom: 18px; box-shadow: 0 10px 24px rgba(79,90,232,.22); }
+  .owner-card .pname { font-size: 17px; font-weight: 700; }
+  .owner-card .plabel { font-size: 12px; color: rgba(255,255,255,.82); margin-top: 2px; }
+  .prog-block { margin-bottom: 18px; }
+  .prog-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+  .prog-row b { color: var(--text); font-size: 15px; }
+  .bar { height: 9px; background: #eef0f4; border-radius: 8px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), #7a83ff); border-radius: 8px; transition: width .5s; }
+  .stat-list { display: flex; flex-direction: column; gap: 10px; }
+  .stat { display: flex; align-items: center; justify-content: space-between; background: #fafbfe; border: 1px solid var(--line); border-radius: 13px; padding: 13px 15px; transition: .15s; }
+  .stat:hover { border-color: var(--line-2); box-shadow: var(--shadow-sm); }
+  .stat .k { font-size: 12.5px; color: var(--muted); }
+  .stat .v { font-size: 16px; font-weight: 800; color: var(--text); }
+  .stat .v.warn { color: var(--gold-strong); }
+  .stat .v.ok { color: var(--green); }
+  .hint { margin-top: 16px; background: var(--gold-soft); border: 1px solid #f3e3c2; border-radius: 13px; padding: 13px 14px; font-size: 12px; color: #8a6a24; line-height: 1.65; }
+
+  /* ===== 中栏 ===== */
+  .col-mid { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; }
+  .villa-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  .vt { border: 1px solid var(--line-2); background: #fff; border-radius: 11px; padding: 9px 18px; font-size: 13px; cursor: pointer; color: var(--muted); font-weight: 600; transition: .15s; white-space: nowrap; }
+  .vt:hover { border-color: var(--primary); color: var(--primary); }
+  .vt.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 6px 14px rgba(79,90,232,.22); }
+  .vt .mini-badge { display: inline-block; background: rgba(255,255,255,.24); border-radius: 6px; font-size: 11px; padding: 1px 6px; margin-left: 7px; }
+  .mid-body { flex: 1; }
+
+  /* 全部别墅汇总卡片 */
+  .villa-summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+  .villa-summary { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; cursor: pointer; transition: .18s; }
+  .villa-summary:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .vs-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .vs-villa { font-size: 17px; font-weight: 800; letter-spacing: -.2px; }
+  .vs-type { font-size: 12px; color: var(--muted); }
+  .vs-head .spacer { flex: 1; }
+  .badge { font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 20px; }
+  .badge.full { background: var(--primary-soft); color: var(--primary); }
+  .badge.notfull { background: var(--gold-soft); color: var(--gold-strong); }
+  .vs-bar-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+  .vs-bar-row b { color: var(--text); font-size: 13px; }
+  .vs-meta { display: flex; gap: 18px; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+  .vs-meta b { color: var(--text); }
+  .vs-enter { margin-top: 14px; font-size: 12.5px; color: var(--primary); font-weight: 700; }
+
+  /* 单个别墅视图 */
+  .one-villa-head { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); }
+  .one-villa-head .ov-villa { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+  .one-villa-head .ov-type { color: var(--muted); font-size: 13px; }
+  .one-villa-head .spacer { flex: 1; }
+  .ov-stat { text-align: right; }
+  .ov-stat .num { font-size: 22px; font-weight: 800; }
+  .ov-stat .num small { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .ov-stat .lbl { font-size: 11.5px; color: var(--muted); }
+  .seg { display: inline-flex; background: #f0f1f6; border-radius: 11px; padding: 4px; gap: 4px; margin-bottom: 16px; }
+  .seg button { border: none; background: transparent; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); transition: .15s; }
+  .seg button.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+
+  /* 房间卡片 */
+  .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .room { border: 1.5px solid var(--line); border-radius: 15px; padding: 16px; min-height: 122px; transition: .16s; background: #fff; cursor: pointer; position: relative; }
+  .room:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+  .room.drop-hint { border-color: var(--gold); background: var(--gold-soft); }
+  .room .rhead { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; }
+  .room .r-emoji { font-size: 18px; }
+  .room .rtype { font-size: 14px; font-weight: 700; }
+  .room .rtype small { color: var(--muted); font-weight: 500; margin-left: 2px; font-size: 12px; }
+  .room .occ { margin-left: auto; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 8px; }
+  .occ.f0 { background: #f0f2f6; color: var(--muted); }
+  .occ.part { background: var(--gold-soft); color: var(--gold-strong); }
+  .occ.single { background: var(--primary-soft); color: var(--primary); }
+  .occ.full { background: var(--primary-soft); color: var(--primary); }
+  .room .residents { display: flex; flex-wrap: wrap; gap: 6px; }
+  .person-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; background: #f5f6fa; border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; font-weight: 500; }
+  .person-tag.f { background: #fdf0f3; border-color: #f6d3dc; color: #c05270; }
+  .person-tag.m { background: #eef4fd; border-color: #d4e3f6; color: #3a6bab; }
+  .person-tag.single-badge { background: var(--primary-soft); border-color: #d6daff; color: var(--primary); }
+  .room .empty-slot { font-size: 12px; color: var(--muted); border: 1.5px dashed var(--line-2); border-radius: 8px; padding: 4px 9px; display: inline-flex; align-items: center; }
+  .reset-btn { position: absolute; top: 10px; right: 12px; font-size: 11px; color: var(--muted); cursor: pointer; padding: 3px 8px; border-radius: 7px; background: #f0f2f6; border: 1px solid var(--line); opacity: 0; transition: .15s; }
+  .room:hover .reset-btn { opacity: 1; }
+  .reset-btn:hover { color: var(--red); border-color: #f4d2d2; background: #fdf0f0; }
+
+  /* 别墅详情（子tab） */
+  .detail-wrap { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+  .detail-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); overflow: hidden; }
+  .dc-head { padding: 16px 20px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; }
+  .floor-plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
+  .fp-room { border: 1.5px solid var(--line); border-radius: 13px; padding: 16px; min-height: 150px; display: flex; flex-direction: column; background: #fbfcfe; }
+  .fp-room .emoji { font-size: 28px; line-height: 1; margin-bottom: 8px; }
+  .fp-room .fr-type { font-size: 13.5px; font-weight: 700; }
+  .fp-room .fr-no { font-size: 11.5px; color: var(--muted); margin: 2px 0 8px; }
+  .fp-room .occ { align-self: flex-start; margin-left: 0; }
+  .fp-room .residents { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .common-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px 20px; }
+  .ca { border-radius: 14px; padding: 18px; color: #fff; min-height: 92px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .ca.pool { background: linear-gradient(135deg, #37b2d7, #6dd2ec); }
+  .ca.dining { background: linear-gradient(135deg, #e2a13c, #f2c66d); }
+  .ca .ca-label { font-size: 14.5px; font-weight: 700; }
+  .ca .ca-sub { font-size: 12px; opacity: .9; }
+  .villa-info { padding: 14px 20px 18px; }
+  .vi-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .vi-row:last-child { border-bottom: none; }
+  .vi-row .k { color: var(--muted); }
+  .vi-row .v { font-weight: 700; }
+
+  /* ===== 右栏 ===== */
+  .col-right { flex: 0 0 318px; background: #fff; border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+  .right-head { padding: 20px 18px 14px; border-bottom: 1px solid var(--line); }
+  .right-head .cnt { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .right-head .cnt.hl b { color: var(--gold-strong); }
+  .right-search { margin: 12px 16px 10px; }
+  .right-search input { width: 100%; }
+  .search { border: 1px solid var(--line-2); border-radius: 11px; padding: 9px 13px; font-size: 13px; outline: none; background: #fbfcfe; transition: .15s; }
+  .search:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(79,90,232,.1); }
+  .filter-row { display: flex; gap: 6px; padding: 0 16px 12px; align-items: center; }
+  .sex-filter { display: flex; gap: 5px; }
+  .sex-filter button { border: 1px solid var(--line-2); background: #fff; border-radius: 9px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: var(--muted); font-weight: 600; }
+  .sex-filter button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .filter-row .lbl { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .sort-select { border: 1px solid var(--line-2); border-radius: 9px; padding: 5px 9px; font-size: 12px; color: var(--text); background: #fff; outline: none; }
+  .person-list { flex: 1; overflow-y: auto; padding: 4px 16px 16px; }
+  .person-card { border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; margin-bottom: 10px; cursor: pointer; transition: .15s; background: #fff; position: relative; }
+  .person-card:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+  .person-card.selected { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 4px rgba(79,90,232,.1); }
+  .person-card.dragging { opacity: .4; }
+  .pc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .sex { width: 20px; height: 20px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; flex: 0 0 20px; }
+  .sex.f { background: #e0779a; }
+  .sex.m { background: #4f8ad6; }
+  .pc-name { font-size: 14.5px; font-weight: 700; }
+  .pc-tag { font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 7px; margin-left: auto; }
+  .tag-reward { background: #fff0d9; color: #c07a1c; }
+  .tag-single { background: var(--primary-soft); color: var(--primary); }
+  .pc-meta { font-size: 11.5px; color: var(--muted); line-height: 1.65; margin-bottom: 4px; }
+  .pc-meta b { color: var(--text); font-weight: 600; }
+  .pc-actions { display: flex; gap: 7px; margin-top: 9px; }
+  .btn-sm { border: 1px solid var(--line-2); background: #fff; border-radius: 9px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600; color: var(--text); transition: .15s; }
+  .btn-sm:hover { border-color: var(--primary); background: #f7f8ff; color: var(--primary); }
+  .btn-sm.gold { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .btn-sm.gold:hover { background: var(--gold-strong); color: #fff; }
+  .btn-sm.outline-red { color: var(--red); border-color: #f4d2d2; }
+  .btn-sm.outline-red:hover { background: #fdf0f0; border-color: var(--red); color: var(--red); }
+  .btn-sm:disabled { opacity: .45; cursor: not-allowed; background: #f0f2f6; color: var(--muted); border-color: var(--line); }
+  .empty-list { text-align: center; color: var(--muted); font-size: 13px; padding: 44px 10px; }
+  .empty-list .ok { font-size: 38px; color: var(--green); }
+
+  /* 付款页 */
+  .pay-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; overflow: hidden; }
+  .pc-head { padding: 17px 22px; border-bottom: 1px solid var(--line); font-size: 14.5px; font-weight: 700; }
+  .pay-list { padding: 6px 22px; }
+  .pay-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .pay-item:last-child { border-bottom: none; }
+  .pay-item .pi-name { font-weight: 700; }
+  .pay-item .pi-tag { font-size: 11px; background: var(--primary-soft); color: var(--primary); padding: 3px 9px; border-radius: 6px; margin-left: 9px; font-weight: 600; }
+  .pay-item .pi-amt { margin-left: auto; }
+  .pay-item .pi-amt b { color: var(--text); font-size: 15px; }
+  .pay-total { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 18px 22px; border-top: 2px solid var(--line); }
+  .pay-total .t-label { color: var(--muted); font-size: 13px; }
+  .pay-total .t-num { font-size: 14px; color: var(--muted); }
+  .pay-total .t-num b { font-size: 27px; color: var(--gold-strong); }
+  .pay-methods { display: flex; gap: 12px; padding: 6px 22px 18px; flex-wrap: wrap; }
+  .pm-opt { border: 1.5px solid var(--line-2); border-radius: 12px; padding: 13px 17px; cursor: pointer; display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 600; transition: .15s; }
+  .pm-opt.active { border-color: var(--primary); background: var(--primary-soft); }
+  .pm-opt .pm-emoji { font-size: 20px; }
+  .pm-opt .warn-label { font-size: 10.5px; color: var(--gold-strong); font-weight: 600; margin-left: 2px; }
+  .pay-foot { padding: 16px 22px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* 弹窗 / toast */
+  .mask { position: fixed; inset: 0; background: rgba(18,22,40,.48); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px); }
+  .mask.show { display: flex; }
+  .dialog { width: 380px; background: #fff; border-radius: 18px; box-shadow: var(--shadow-lg); overflow: hidden; animation: pop .18s ease; }
+  @keyframes pop { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .dlg-head { padding: 18px 22px; background: #fff; border-bottom: 1px solid var(--line); font-size: 16px; font-weight: 800; letter-spacing: -.2px; }
+  .dlg-body { padding: 22px; }
+  .dlg-body .person-line { font-size: 13.5px; margin-bottom: 12px; color: var(--muted); }
+  .dlg-body .person-line b { font-size: 16px; color: var(--text); }
+  .fee-box { background: var(--gold-soft); border: 1px solid #f3e3c2; border-radius: 12px; padding: 14px 16px; margin: 14px 0; display: flex; align-items: center; justify-content: space-between; }
+  .fee-box .fee { font-size: 24px; font-weight: 800; color: var(--gold-strong); }
+  .fee-box .fee small { font-size: 12px; font-weight: 500; color: #b08a3d; }
+  .dlg-foot { padding: 16px 22px; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--line); }
+  .btn-ghost { background: #f0f2f6; color: var(--text); border: none; border-radius: 10px; padding: 10px 20px; font-size: 13.5px; cursor: pointer; font-weight: 600; }
+  .btn-ghost:hover { background: #e6e9f0; }
+
+  .toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--gold); box-shadow: var(--shadow-lg); border-radius: 12px; padding: 14px 20px; font-size: 13.5px; display: none; z-index: 120; max-width: 460px; }
+  .toast.show { display: flex; align-items: center; gap: 10px; animation: slide .25s ease; }
+  .toast.err { border-left-color: var(--red); }
+  .toast.ok { border-left-color: var(--green); }
+  @keyframes slide { from { transform: translate(-50%, -10px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+
+  .proto-note { position: fixed; right: 18px; bottom: 18px; background: #1f2430; color: #d7dbe6; border-radius: 13px; padding: 12px 16px; font-size: 12px; box-shadow: var(--shadow-lg); max-width: 360px; line-height: 1.6; z-index: 50; }
+  .proto-note b { color: #7a83ff; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo"><span class="ico">墅</span>别墅智能分房系统</div>
+    <div class="crumbs" id="crumbs">秋季表彰大会 <span class="sep">/</span> 别墅分房 <span class="sep">/</span> <b>全董分房工作台</b></div>
+    <div class="spacer"></div>
+    <button class="btn btn-back" id="btnBack" style="display:none">← 返回工作台</button>
+    <select class="activity-select"><option>2026 秋季表彰大会</option><option>2026 年中精英峰会</option></select>
+    <button class="btn btn-primary" id="btnSubmit">提 交 分 房</button>
+    <div class="top-divider"></div>
+    <div class="user-area">
+      <span class="avatar">王</span>
+      <div class="user-meta"><span class="uname">王雨桐</span><span class="urole">会务组</span></div>
+      <button class="btn-logout" id="btnLogout">退出</button>
+    </div>
+  </div>
+
+  <!-- ========== 工作台 ========== -->
+  <div class="workspace" id="viewWorkbench">
+    <aside class="col-left">
+      <div class="panel-title"><span class="dot"></span>分房进度 · 全董</div>
+      <div class="owner-card"><div class="pname">崔雁飞</div><div class="plabel">全董 · 团队负责人</div></div>
+      <div class="prog-block">
+        <div class="prog-row"><span>已分房 / 总人数</span><b id="progNum">--</b></div>
+        <div class="bar"><i id="progBar" style="width:0%"></i></div>
+      </div>
+      <div class="stat-list">
+        <div class="stat"><span class="k">报名人数</span><span class="v" id="statTotal">--</span></div>
+        <div class="stat"><span class="k">男生 / 女生</span><span class="v" id="statSex">--</span></div>
+        <div class="stat"><span class="k">剩余待排床位</span><span class="v warn" id="statRemain">--</span></div>
+        <div class="stat"><span class="k">未排满别墅</span><span class="v" id="statRoom">--</span></div>
+        <div class="stat"><span class="k">升级费用已计</span><span class="v" id="statFee">￥0</span></div>
+      </div>
+      <div class="hint">💡 拼别墅的 3 人由会务组统筹安排，将尽量满足房型需求。</div>
+    </aside>
+
+    <main class="col-mid">
+      <div id="midContent"></div>
+    </main>
+
+    <aside class="col-right">
+      <div class="right-head">
+        <div class="panel-title" style="margin-bottom:0"><span class="dot"></span>待分配人员 <span id="pendingNum" style="color:var(--gold-strong)">--</span> 人</div>
+        <div class="cnt hl" id="selectHint">点击人员选中，再点房间放置</div>
+      </div>
+      <div class="right-search"><input class="search" id="personSearch" placeholder="🔍 搜索姓名 / 上手董事 / 区董"></div>
+      <div class="filter-row">
+        <div class="sex-filter">
+          <button class="active" data-sex="all">全部</button>
+          <button data-sex="f">女</button>
+          <button data-sex="m">男</button>
+        </div>
+        <span class="lbl">排序</span>
+        <select class="sort-select" id="sortSelect"><option>RSE 优先 → SE</option><option>姓名</option></select>
+      </div>
+      <div class="person-list" id="personList"></div>
+    </aside>
+  </div>
+
+  <!-- ========== 付款页 ========== -->
+  <div class="page-view" id="viewPayment" style="display:none">
+    <div class="view-inner">
+      <div class="page-title">付款确认</div>
+      <div class="page-sub">升级单人入住 · 3200 元/间/全程</div>
+      <div class="pay-card">
+        <div class="pc-head">升级单人入住明细</div>
+        <div class="pay-list" id="payList"></div>
+        <div class="pay-total"><span class="t-label">合计</span><span class="t-num" id="payTotal">--</span></div>
+      </div>
+      <div class="pay-card">
+        <div class="pc-head">付款方式</div>
+        <div class="pay-methods" id="payMethods">
+          <div class="pm-opt" data-method="wechat"><span class="pm-emoji">💚</span>微信支付</div>
+          <div class="pm-opt" data-method="alipay"><span class="pm-emoji">💙</span>支付宝</div>
+          <div class="pm-opt active" data-method="offline"><span class="pm-emoji">📋</span>线下对账 <span class="warn-label">待确认</span></div>
+        </div>
+        <div class="pay-foot">
+          <button class="btn-ghost" id="btnPayBack">返回修改</button>
+          <button class="btn-primary" id="btnPayConfirm">确认付款</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 升级弹窗 -->
+  <div class="mask" id="maskUpgrade">
+    <div class="dialog">
+      <div class="dlg-head">升级单人入住</div>
+      <div class="dlg-body">
+        <div class="person-line">确认 <b id="upName">--</b> 升级单人入住？</div>
+        <div class="fee-box"><span style="font-size:13px;color:#8a6a24">单人入住费用</span><span class="fee">￥3200 <small>/间/全程</small></span></div>
+        <div style="font-size:12.5px;color:var(--muted)">确认后房间置为单人 1/1，后台导出 H 列标记 Y。</div>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn-ghost" id="btnCancel">取消</button>
+        <button class="btn-primary" id="btnConfirm">确认升级</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 取消升级弹窗 -->
+  <div class="mask" id="maskCancelUpgrade">
+    <div class="dialog">
+      <div class="dlg-head">取消单人入住</div>
+      <div class="dlg-body">
+        <div class="person-line">确认取消 <b id="cuName">--</b> 的单人入住？</div>
+        <div class="fee-box"><span style="font-size:13px;color:#8a6a24">退回费用</span><span class="fee">-￥3200 <small>/间/全程</small></span></div>
+        <div style="font-size:12.5px;color:var(--muted)">取消后恢复拼房，后台导出 H 列标记清空。</div>
+      </div>
+      <div class="dlg-foot">
+        <button class="btn-ghost" id="btnCancelCU">返回</button>
+        <button class="btn-primary" id="btnConfirmCU">确认取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="proto-note">
+    <b>别墅切换：</b>顶部横向「别墅 tab」做大切换；其中「全部别墅」看汇总，点某栋看该栋房间分配 + 别墅详情两个子切换。
+  </div>
+
+<script>
+(function(){
+  var state = {
+    selectedId: null,
+    upgradeFee: 0,
+    upgrades: [],
+    paid: false,
+    currentVillaTab: 'all',
+    villaDetailMode: 'assign',
+    payMethod: 'offline',
+    personFilter: { search: '', sex: 'all' },
+    sortBy: 'rse',
+    persons: [
+      { id:'p1', name:'余梦',    sex:'f', se:'TOP SE', rse:'TOP RSE', rank:[1,1], peer:'张三', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
+      { id:'p2', name:'崔帅杰',  sex:'m', se:'TOP SE', rse:'TOP RSE', rank:[1,2], peer:'张三', peerNote:'获奖单人入住', canUpgrade:false, single:true, reward:true, locked:true },
+      { id:'p3', name:'刘芳',    sex:'f', se:'SE',     rse:'RSE',     rank:[2,1], peer:'李四', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
+      { id:'p4', name:'王强',    sex:'m', se:'SE',     rse:'RSE',     rank:[2,2], peer:'赵六', peerNote:'—',          canUpgrade:true, single:true, reward:false }
+    ],
+    rooms: [
+      { id:'a1', villa:'A-0101', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'一一',sex:'f'},{name:'三三',sex:'m'}] },
+      { id:'a2', villa:'A-0101', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'张三',sex:'m'}] },
+      { id:'a3', villa:'A-0101', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'李四',sex:'f'}] },
+      { id:'a4', villa:'A-0102', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'王五',sex:'m'},{name:'赵六',sex:'m'}] },
+      { id:'a5', villa:'A-0102', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'陈七',sex:'f'},{name:'林八',sex:'f'}] },
+      { id:'a6', villa:'A-0102', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'钱九',sex:'m'}] },
+      { id:'b1', villa:'B-0101', type:'B', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'二二',sex:'f'},{name:'四四',sex:'m'}] },
+      { id:'b2', villa:'B-0101', type:'B', roomNo:'2号房', roomType:'大床',    cap:2, residents:[{name:'孙十',sex:'f'},{name:'周十一',sex:'f'}] },
+      { id:'b3', villa:'B-0101', type:'B', roomNo:'3号房', roomType:'浴缸大床', cap:2, residents:[{name:'吴十二',sex:'m'},{name:'郑十三',sex:'m'}] }
+    ]
+  };
+
+  var occupiedCount = function(){ return state.rooms.reduce(function(s,r){ return s + r.residents.length; }, 0); };
+  var getTotal = function(){ return occupiedCount() + state.persons.length; };
+  var villaNames = function(){ var set={}; state.rooms.forEach(function(r){set[r.villa]=true;}); return Object.keys(set).sort(); };
+  var roomsOf = function(vn){ return state.rooms.filter(function(r){return r.villa===vn;}); };
+
+  function toast(msg, type){
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show ' + (type||'');
+    clearTimeout(toast._t); toast._t = setTimeout(function(){ t.className = 'toast'; }, 2600);
+  }
+  function occClass(room){
+    if (room.single) return 'single';
+    if (room.residents.length === 0) return 'f0';
+    if (room.residents.length >= room.cap) return room.cap === 1 ? 'single' : 'full';
+    return 'part';
+  }
+  function occText(room){
+    if (room.single) return '1/1';
+    if (room.residents.length >= room.cap) return room.cap + '/' + room.cap;
+    return room.residents.length + '/' + room.cap;
+  }
+  function roomEmoji(room){ return room.roomType === '浴缸大床' ? '🛁' : (room.roomType === '大床' ? '🛏' : '🛏🛏'); }
+
+  // ===== 视图切换 =====
+  function showView(view){
+    document.getElementById('viewWorkbench').style.display = view==='workbench' ? 'flex' : 'none';
+    document.getElementById('viewPayment').style.display = view==='payment' ? 'block' : 'none';
+    document.getElementById('btnSubmit').style.display = view==='workbench' ? '' : 'none';
+    document.getElementById('btnBack').style.display = view==='workbench' ? 'none' : '';
+    var cr = document.getElementById('crumbs');
+    if (view==='workbench'){
+      cr.innerHTML = '秋季表彰大会 <span class="sep">/</span> 别墅分房 <span class="sep">/</span> <b>全董分房工作台</b>';
+      renderAll();
+    } else {
+      cr.innerHTML = '秋季表彰大会 <span class="sep">/</span> 别墅分房 <span class="sep">/</span> <b>付款确认</b>';
+      renderPayment();
+    }
+  }
+
+  // ===== 左栏 =====
+  function renderLeft(){
+    var total = getTotal(), occ = occupiedCount();
+    document.getElementById('progNum').textContent = occ + ' / ' + total;
+    document.getElementById('progBar').style.width = total ? (occ/total*100) + '%' : '0%';
+    document.getElementById('statTotal').textContent = total + ' 人';
+    var m = 0, f = 0;
+    state.persons.forEach(function(p){ if(p.sex==='m') m++; else f++; });
+    state.rooms.forEach(function(r){ r.residents.forEach(function(x){ if(x.sex==='m') m++; else f++; }); });
+    document.getElementById('statSex').textContent = m + ' / ' + f;
+    var remainBed = state.rooms.reduce(function(s,r){ return s + Math.max(0, r.cap - r.residents.length); }, 0);
+    document.getElementById('statRemain').textContent = remainBed;
+    var freeVillas = {};
+    state.rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
+    document.getElementById('statRoom').textContent = Object.keys(freeVillas).length + ' 套';
+    document.getElementById('statFee').textContent = '￥' + state.upgradeFee.toLocaleString();
+  }
+
+  // ===== 中栏 =====
+  function tabBtn(key, label, active, mini){
+    return '<button class="vt'+(active?' active':'')+'" data-vta="'+key+'">'+label+(mini!==undefined?'<span class="mini-badge">'+mini+'</span>':'')+'</button>';
+  }
+  function renderMid(){
+    var names = villaNames();
+    var html = '<div class="villa-tabs">';
+    html += tabBtn('all', '全部别墅', state.currentVillaTab==='all', names.length);
+    names.forEach(function(n){ html += tabBtn(n, n, state.currentVillaTab===n); });
+    html += '</div>';
+    html += '<div class="mid-body">' + (state.currentVillaTab==='all' ? renderAllVillas(names) : renderOneVilla(state.currentVillaTab)) + '</div>';
+    document.getElementById('midContent').innerHTML = html;
+  }
+
+  function renderAllVillas(names){
+    var html = '<div class="villa-summary-grid">';
+    names.forEach(function(vn){
+      var rooms = roomsOf(vn);
+      var occ = rooms.reduce(function(s,r){return s+r.residents.length;},0);
+      var cap = rooms.reduce(function(s,r){return s+r.cap;},0);
+      var full = occ >= cap;
+      var remain = Math.max(0, cap - occ);
+      html += '<div class="villa-summary" data-villa-summary="'+vn+'">'
+        + '<div class="vs-head"><span class="vs-villa">'+vn+'</span><span class="vs-type">崔雁飞团队</span><span class="spacer"></span>'
+        + '<span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span></div>'
+        + '<div class="vs-bar-row"><span>占床</span><b>'+occ+' / '+cap+'</b></div>'
+        + '<div class="bar"><i style="width:'+(cap?(occ/cap*100):0)+'%"></i></div>'
+        + '<div class="vs-meta"><span>房间 <b>'+rooms.length+'</b> 间</span><span>剩余床位 <b>'+remain+'</b></span></div>'
+        + '<div class="vs-enter">进入分房 →</div>'
+        + '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderOneVilla(vn){
+    var rooms = roomsOf(vn);
+    var occ = rooms.reduce(function(s,r){return s+r.residents.length;},0);
+    var cap = rooms.reduce(function(s,r){return s+r.cap;},0);
+    var full = occ >= cap;
+    var head = '<div class="one-villa-head"><div><div class="ov-villa">'+vn+'</div><div class="ov-type">崔雁飞团队 · '+rooms.length+' 间房</div></div><div class="spacer"></div>'
+      + '<span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span>'
+      + '<div class="ov-stat"><div class="num">'+occ+'<small> / '+cap+'</small></div><div class="lbl">占床</div></div></div>';
+    var seg = '<div class="seg"><button class="'+(state.villaDetailMode==='assign'?'active':'')+'" data-mode="assign">房间分配</button>'
+      + '<button class="'+(state.villaDetailMode==='detail'?'active':'')+'" data-mode="detail">别墅详情</button></div>';
+    var body = state.villaDetailMode==='assign' ? renderRoomsGrid(rooms) : renderVillaDetail(vn, rooms);
+    return head + seg + body;
+  }
+
+  function renderRoomsGrid(rooms){
+    var html = '<div class="rooms-grid">';
+    rooms.forEach(function(r){
+      var free = r.cap - r.residents.length;
+      var tags = r.residents.map(function(x){
+        var sb = r.single ? ' single-badge' : '';
+        return '<span class="person-tag '+x.sex+sb+'">'+x.name+(r.single?' · 单人':'')+'</span>';
+      }).join('');
+      if (free > 0) tags += '<span class="empty-slot">可点击放入 '+free+' 人</span>';
+      html += '<div class="room" data-room="'+r.id+'" data-cap="'+r.cap+'">'
+        + '<button class="reset-btn" data-reset="'+r.id+'">重排</button>'
+        + '<div class="rhead"><span class="r-emoji">'+roomEmoji(r)+'</span><span class="rtype">'+r.roomNo+' <small>'+r.roomType+'</small></span>'
+        + '<span class="occ '+occClass(r)+'">'+occText(r)+'</span></div>'
+        + '<div class="residents">'+tags+'</div></div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderVillaDetail(vn, rooms){
+    var fp = rooms.map(function(r){
+      var tags = r.residents.map(function(x){ return '<span class="person-tag '+x.sex+'">'+x.name+'</span>'; }).join('');
+      if (r.residents.length < r.cap) tags += '<span class="empty-slot">可住 '+(r.cap-r.residents.length)+' 人</span>';
+      return '<div class="fp-room"><span class="emoji">'+roomEmoji(r)+'</span><span class="fr-type">'+r.roomType+'</span><span class="fr-no">'+r.roomNo+'</span>'
+        + '<span class="occ '+occClass(r)+'">'+occText(r)+'</span><div class="residents">'+tags+'</div></div>';
+    }).join('');
+    var occ = rooms.reduce(function(s,r){return s+r.residents.length;},0);
+    var cap = rooms.reduce(function(s,r){return s+r.cap;},0);
+    var full = occ >= cap;
+    return '<div class="detail-wrap">'
+      + '<div class="detail-card"><div class="dc-head">🏠 房型与入住</div>'
+      + '<div class="floor-plan">'+fp+'</div>'
+      + '<div class="common-area">'
+      + '<div class="ca pool"><div class="ca-label">🏊 别墅专享泳池</div><div class="ca-sub">独立私享 · 含池畔休憩区</div></div>'
+      + '<div class="ca dining"><div class="ca-label">🍽️ 别墅专享客餐厅</div><div class="ca-sub">独立客厅 + 用餐区</div></div>'
+      + '</div></div>'
+      + '<div class="detail-card"><div class="dc-head">别墅信息</div><div class="villa-info">'
+      + '<div class="vi-row"><span class="k">别墅号</span><span class="v">'+vn+'</span></div>'
+      + '<div class="vi-row"><span class="k">别墅类型</span><span class="v">别墅 '+vn.charAt(0)+'</span></div>'
+      + '<div class="vi-row"><span class="k">所属全董</span><span class="v">崔雁飞</span></div>'
+      + '<div class="vi-row"><span class="k">占床</span><span class="v">'+occ+' / '+cap+'</span></div>'
+      + '<div class="vi-row"><span class="k">分配状态</span><span class="v"><span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span></span></div>'
+      + '</div></div></div>';
+  }
+
+  // ===== 右栏 =====
+  function renderRight(){
+    var list = state.persons.slice();
+    var q = state.personFilter.search.trim();
+    if (q) list = list.filter(function(p){ return p.name.indexOf(q) > -1 || p.peer.indexOf(q) > -1; });
+    if (state.personFilter.sex !== 'all') list = list.filter(function(p){ return p.sex === state.personFilter.sex; });
+    if (state.sortBy === 'rse') list.sort(function(a,b){ return a.rank[0]-b.rank[0] || a.rank[1]-b.rank[1]; });
+    else list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh'); });
+
+    document.getElementById('pendingNum').textContent = state.persons.length;
+    var box = document.getElementById('personList');
+    if (!list.length){
+      box.innerHTML = state.persons.length === 0
+        ? '<div class="empty-list"><div class="ok">✓</div>所有人员已分配完毕<br>点击右上角「提交分房」</div>'
+        : '<div class="empty-list">无匹配结果</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(p){
+      var sel = state.selectedId === p.id ? ' selected' : '';
+      var singleTag = p.single ? '<span class="pc-tag tag-single">单人入住</span>' : (p.canUpgrade ? '<span class="pc-tag tag-single">可升级单人</span>' : '');
+      var rewardTag = p.reward ? '<span class="pc-tag tag-reward">获奖·浴缸大床</span>' : '';
+      var actions = '';
+      if (p.single && !p.locked){
+        actions = '<div class="pc-actions"><button class="btn-sm outline-red" data-cancel="'+p.id+'">取消单人入住</button></div>';
+      } else if (p.canUpgrade && !p.single){
+        actions = '<div class="pc-actions"><button class="btn-sm gold" data-upgrade="'+p.id+'">💰 升级单人入住</button></div>';
+      } else if (p.locked){
+        actions = '<div class="pc-actions"><button class="btn-sm" disabled>已锁定单人</button></div>';
+      }
+      html += '<div class="person-card'+sel+'" draggable="true" data-person="'+p.id+'">'
+        + '<div class="pc-top"><span class="sex '+p.sex+'">'+(p.sex==='f'?'女':'男')+'</span><span class="pc-name">'+p.name+'</span>'+(rewardTag||singleTag)+'</div>'
+        + '<div class="pc-meta">'+p.rse+' · '+p.se+'<br>同住意愿：<b>'+p.peer+'</b> · '+p.peerNote+'</div>'
+        + actions + '</div>';
+    });
+    box.innerHTML = html;
+  }
+  function renderAll(){ renderLeft(); renderMid(); renderRight(); }
+
+  // ===== 付款 =====
+  function renderPayment(){
+    var list = state.upgrades;
+    var box = document.getElementById('payList');
+    if (!list.length){
+      box.innerHTML = '<div class="empty-list">暂无升级单人入住记录</div>';
+      document.getElementById('payTotal').innerHTML = '<b>￥0</b>';
+      return;
+    }
+    box.innerHTML = list.map(function(u){
+      return '<div class="pay-item"><span class="pi-name">'+u.name+'</span><span class="pi-tag">单人入住</span><span class="pi-amt"><b>￥'+u.amount.toLocaleString()+'</b> × 1 间</span></div>';
+    }).join('');
+    var total = list.reduce(function(s,u){ return s + u.amount; }, 0);
+    document.getElementById('payTotal').innerHTML = list.length + ' 间 × ￥3200 = <b>￥' + total.toLocaleString() + '</b>';
+  }
+
+  // ===== 动作 =====
+  function assignPerson(personId, roomId){
+    var p = state.persons.filter(function(x){return x.id===personId;})[0];
+    var r = state.rooms.filter(function(x){return x.id===roomId;})[0];
+    if (!p) { toast('未找到该人员','err'); return; }
+    if (r.residents.length >= r.cap) { toast('「'+r.roomNo+'」已满，无法放入','err'); return; }
+    if (p.reward && r.roomType !== '浴缸大床') { toast('获奖人员需入住浴缸大床房，请重新选择','err'); return; }
+    state.persons = state.persons.filter(function(x){return x.id!==personId;});
+    r.residents.push({name:p.name, sex:p.sex});
+    if (p.single) r.single = true;
+    state.selectedId = null;
+    renderAll();
+    toast('已将「'+p.name+'」安排入住 '+r.villa+' '+r.roomNo, 'ok');
+  }
+  function resetRoom(roomId){
+    var r = state.rooms.filter(function(x){return x.id===roomId;})[0];
+    if (!r) return;
+    if (!r.residents.length && !r.single) return;
+    var people = r.residents.map(function(x){ return {name:x.name, sex:x.sex}; });
+    r.residents = [];
+    r.single = false;
+    state.persons = state.persons.concat(people.map(function(x,i){
+      return { id:'rp'+(Date.now())+i, name:x.name, sex:x.sex, se:'—', rse:'—', rank:[9,9], peer:'—', peerNote:'', canUpgrade:true, single:false, reward:false };
+    }));
+    renderAll();
+    toast('已将 '+r.villa+' '+r.roomNo+' 人员退回待分配', 'err');
+  }
+  function doUpgrade(id){
+    var p = state.persons.filter(function(x){return x.id===id;})[0];
+    if (p){ p.single = true; p.canUpgrade = false; state.upgradeFee += 3200; state.upgrades.push({ name:p.name, amount:3200 }); }
+    renderAll();
+    toast('已升级单人入住，费用 ￥3200 已计入', 'ok');
+  }
+  function doCancelUpgrade(id){
+    var p = state.persons.filter(function(x){return x.id===id;})[0];
+    if (p){
+      p.single = false; p.canUpgrade = true; state.upgradeFee = Math.max(0, state.upgradeFee - 3200);
+      var idx = state.upgrades.findIndex(function(u){return u.name===p.name;});
+      if (idx > -1) state.upgrades.splice(idx, 1);
+    }
+    renderAll();
+    toast('已取消单人入住，退回 ￥3200', 'err');
+  }
+
+  // ===== 事件 =====
+  var upgradeTarget = null, cancelTarget = null;
+  document.addEventListener('click', function(e){
+    var card = e.target.closest('.person-card');
+    if (card && !e.target.closest('[data-upgrade]') && !e.target.closest('[data-cancel]')){
+      state.selectedId = state.selectedId === card.dataset.person ? null : card.dataset.person;
+      renderRight();
+      var p = state.persons.filter(function(x){return x.id===state.selectedId;})[0];
+      document.getElementById('selectHint').innerHTML = p ? '已选中 <b>'+p.name+'</b>，请点目标房间' : '点击人员选中，再点房间放置';
+      return;
+    }
+    var up = e.target.closest('[data-upgrade]');
+    if (up){ upgradeTarget = up.getAttribute('data-upgrade'); var pp=state.persons.filter(function(x){return x.id===upgradeTarget;})[0]; if(pp) document.getElementById('upName').textContent = pp.name; document.getElementById('maskUpgrade').classList.add('show'); return; }
+    var cu = e.target.closest('[data-cancel]');
+    if (cu){ cancelTarget = cu.getAttribute('data-cancel'); var cp=state.persons.filter(function(x){return x.id===cancelTarget;})[0]; if(cp) document.getElementById('cuName').textContent = cp.name; document.getElementById('maskCancelUpgrade').classList.add('show'); return; }
+    var room = e.target.closest('.room');
+    if (room && !e.target.closest('[data-reset]')){
+      if (!state.selectedId){ toast('请先在右侧点击选择一名待分配人员','err'); return; }
+      assignPerson(state.selectedId, room.dataset.room);
+      return;
+    }
+    var reset = e.target.closest('[data-reset]');
+    if (reset){ resetRoom(reset.getAttribute('data-reset')); return; }
+    var vta = e.target.closest('[data-vta]');
+    if (vta){ state.currentVillaTab = vta.getAttribute('data-vta'); state.villaDetailMode='assign'; renderMid(); return; }
+    var vs = e.target.closest('[data-villa-summary]');
+    if (vs){ state.currentVillaTab = vs.getAttribute('data-villa-summary'); state.villaDetailMode='assign'; renderMid(); return; }
+    var mode = e.target.closest('[data-mode]');
+    if (mode){ state.villaDetailMode = mode.getAttribute('data-mode'); renderMid(); return; }
+    var sexBtn = e.target.closest('.sex-filter button');
+    if (sexBtn){
+      document.querySelectorAll('.sex-filter button').forEach(function(b){b.classList.remove('active');});
+      sexBtn.classList.add('active'); state.personFilter.sex = sexBtn.dataset.sex; renderRight(); return;
+    }
+    var pmOpt = e.target.closest('.pm-opt');
+    if (pmOpt){ document.querySelectorAll('.pm-opt').forEach(function(o){o.classList.remove('active');}); pmOpt.classList.add('active'); state.payMethod = pmOpt.dataset.method; return; }
+  });
+
+  // 拖拽（兼容）
+  var dragCardId = null;
+  document.addEventListener('dragstart', function(e){
+    var c = e.target.closest('.person-card');
+    if (c){ dragCardId = c.dataset.person; c.classList.add('dragging'); try{ e.dataTransfer.setData('text/plain', c.dataset.person); }catch(err){} }
+  });
+  document.addEventListener('dragend', function(e){ var c=e.target.closest('.person-card'); if(c) c.classList.remove('dragging'); dragCardId=null; });
+  document.addEventListener('dragover', function(e){ var r=e.target.closest('.room'); if(!r) return; e.preventDefault(); r.classList.add('drop-hint'); });
+  document.addEventListener('dragleave', function(e){ var r=e.target.closest('.room'); if(r) r.classList.remove('drop-hint'); });
+  document.addEventListener('drop', function(e){
+    var r=e.target.closest('.room'); if(!r) return; e.preventDefault(); r.classList.remove('drop-hint');
+    if (dragCardId) assignPerson(dragCardId, r.dataset.room);
+  });
+
+  document.getElementById('personSearch').addEventListener('input', function(){ state.personFilter.search=this.value; renderRight(); });
+  document.getElementById('sortSelect').addEventListener('change', function(){ state.sortBy = this.value==='姓名'?'name':'rse'; renderRight(); });
+
+  // 弹窗
+  document.getElementById('btnCancel').addEventListener('click', function(){ document.getElementById('maskUpgrade').classList.remove('show'); });
+  document.getElementById('btnConfirm').addEventListener('click', function(){ document.getElementById('maskUpgrade').classList.remove('show'); if(upgradeTarget){ doUpgrade(upgradeTarget); } upgradeTarget=null; });
+  document.getElementById('btnCancelCU').addEventListener('click', function(){ document.getElementById('maskCancelUpgrade').classList.remove('show'); });
+  document.getElementById('btnConfirmCU').addEventListener('click', function(){ document.getElementById('maskCancelUpgrade').classList.remove('show'); if(cancelTarget){ doCancelUpgrade(cancelTarget); } cancelTarget=null; });
+
+  // 返回 / 提交 / 付款
+  document.getElementById('btnBack').addEventListener('click', function(){ showView('workbench'); });
+  document.getElementById('btnSubmit').addEventListener('click', function(){
+    var pend = state.persons.length;
+    var freeVillas = {};
+    state.rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
+    if (pend > 0){ toast('还有 '+pend+' 名人员未分配别墅，请分配好后再提交','err'); return; }
+    if (Object.keys(freeVillas).length > 1){ toast('您有多套别墅出现空房，请分配好后再提交','err'); return; }
+    showView('payment');
+  });
+  document.getElementById('btnPayBack').addEventListener('click', function(){ showView('workbench'); });
+  document.getElementById('btnPayConfirm').addEventListener('click', function(){
+    if (!state.upgrades.length){ toast('没有可付款的升级记录','err'); return; }
+    var total = state.upgrades.reduce(function(s,u){return s+u.amount;},0);
+    state.paid = true;
+    toast('已提交付款，合计 ￥'+total.toLocaleString()+'（'+state.payMethod+'）', 'ok');
+  });
+  document.getElementById('btnLogout').addEventListener('click', function(){
+    toast('已退出登录「王雨桐」，返回登录页', 'ok');
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
