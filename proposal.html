@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>别墅智能分房系统 · 产品方案</title>
+<style>
+  :root {
+    --navy: #1B3A5F;
+    --navy-light: #2a5380;
+    --gold: #C9A84C;
+    --gold-light: #e6cd80;
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #26313e;
+    --muted: #6b7786;
+    --line: #e6e9ee;
+    --green: #2e8b57;
+    --orange: #e07b39;
+    --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1000px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #152c47 0%, #1B3A5F 55%, #244a73 100%);
+    color: #fff;
+    border-radius: 0 0 24px 24px;
+    padding: 56px 48px 48px;
+    margin: 0 -20px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    right: -80px; top: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(201,168,76,.25), transparent 70%);
+    border-radius: 50%;
+  }
+  .hero .kicker {
+    display: inline-block;
+    font-size: 12px; letter-spacing: 3px;
+    color: var(--gold-light);
+    border: 1px solid rgba(201,168,76,.5);
+    padding: 4px 14px; border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  .hero h1 { font-size: 34px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .hero .sub { font-size: 15px; color: #c8d4e2; max-width: 640px; }
+  .hero .meta { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero .meta span {
+    font-size: 12px; color: #c8d4e2;
+    background: rgba(255,255,255,.08);
+    padding: 5px 12px; border-radius: 16px;
+  }
+
+  /* Section */
+  section { margin-bottom: 42px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 22px;
+  }
+  .section-header .num {
+    width: 34px; height: 34px; flex: 0 0 34px;
+    background: var(--navy); color: #fff;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+  }
+  .section-header h2 { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .section-header .en { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 28px;
+    margin-bottom: 18px;
+  }
+  .card h3 { font-size: 17px; color: var(--navy); margin-bottom: 14px; }
+  .card p { color: #3c4854; margin-bottom: 10px; }
+  .card ul { padding-left: 20px; }
+  .card li { margin-bottom: 6px; color: #3c4854; }
+
+  /* Verdict banner */
+  .verdict {
+    background: linear-gradient(135deg, #1B3A5F, #2a5380);
+    color: #fff;
+    border-radius: 16px;
+    padding: 30px 34px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .score-ring {
+    width: 118px; height: 118px; flex: 0 0 118px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold) 0 78%, rgba(255,255,255,.15) 78% 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .score-ring::before {
+    content: ""; position: absolute; inset: 11px;
+    background: #1f4469; border-radius: 50%;
+  }
+  .score-ring .val { position: relative; text-align: center; }
+  .score-ring .val b { display: block; font-size: 34px; font-weight: 800; line-height: 1; }
+  .score-ring .val span { display: block; font-size: 11px; color: #c8d4e2; margin-top: 4px; }
+  .verdict .txt { flex: 1; min-width: 260px; }
+  .verdict .txt .title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .verdict .txt .title em { color: var(--gold-light); font-style: normal; }
+  .verdict .txt p { color: #c8d4e2; font-size: 14px; }
+
+  /* Score bars */
+  .score-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .score-row:last-child { border-bottom: none; }
+  .score-row .dim { flex: 0 0 170px; font-weight: 600; color: var(--navy); font-size: 14px; }
+  .score-row .bar { flex: 1; height: 12px; background: #eef0f3; border-radius: 6px; overflow: hidden; }
+  .score-row .bar i { display: block; height: 100%; border-radius: 6px; }
+  .score-row .sc { flex: 0 0 46px; text-align: right; font-weight: 700; color: var(--navy); }
+  .score-row .note { flex: 1.2; font-size: 12.5px; color: var(--muted); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 14px 0; border-radius: 10px; border: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; }
+  thead th {
+    background: var(--navy); color: #fff;
+    font-size: 13px; font-weight: 600;
+    padding: 12px 14px; text-align: left; white-space: nowrap;
+  }
+  tbody td { padding: 11px 14px; font-size: 13.5px; border-top: 1px solid var(--line); color: #3c4854; vertical-align: top; }
+  tbody tr:nth-child(even) { background: #f7f8fa; }
+  tbody tr:hover { background: #eef3f8; }
+  td.hl { font-weight: 600; color: var(--navy); }
+
+  /* Tag */
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 9px; border-radius: 5px; letter-spacing: .5px;
+  }
+  .tag-blue { background: #e8f0f8; color: var(--navy); }
+  .tag-gold { background: #f7efe0; color: #9a7c24; }
+  .tag-green { background: #e7f3ec; color: var(--green); }
+  .tag-orange { background: #fdeee2; color: var(--orange); }
+  .tag-red { background: #fbe9e7; color: var(--red); }
+
+  /* Module grid */
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .module-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 22px; border-top: 3px solid var(--navy);
+  }
+  .module-card h4 { font-size: 15.5px; color: var(--navy); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .module-card p { font-size: 13px; color: #4a5561; }
+
+  /* Flow steps */
+  .steps { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+  .steps .step {
+    background: #eef3f8; color: var(--navy);
+    padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  }
+  .steps .arrow { color: var(--gold); font-weight: 700; }
+
+  /* Confirm list */
+  .confirm-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .confirm-item:last-child { border-bottom: none; }
+  .confirm-item .q { flex: 0 0 28px; height: 28px; background: var(--gold); color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+  .confirm-item .body { flex: 1; }
+  .confirm-item .body b { color: var(--navy); font-size: 14.5px; }
+  .confirm-item .body p { font-size: 13px; color: #4a5561; margin-top: 3px; }
+
+  /* Roadmap */
+  .roadmap { display: flex; flex-wrap: wrap; gap: 16px; }
+  .phase {
+    flex: 1 1 280px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 22px; position: relative;
+  }
+  .phase .p-tag {
+    position: absolute; top: -11px; left: 18px;
+    background: var(--navy); color: #fff; font-size: 12px; font-weight: 700;
+    padding: 3px 12px; border-radius: 12px;
+  }
+  .phase.gold .p-tag { background: var(--gold); }
+  .phase h4 { margin-top: 8px; color: var(--navy); font-size: 16px; margin-bottom: 8px; }
+  .phase ul { padding-left: 18px; }
+  .phase li { font-size: 13px; color: #4a5561; margin-bottom: 6px; }
+
+  .highlight { background: #fff9ec; border-left: 3px solid var(--gold); padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; color: #5a4a1f; }
+
+  .callout {
+    background: #eef3f8; border-left: 3px solid var(--navy);
+    padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 14px; color: #2c3e50;
+  }
+
+  /* Pricing */
+  .pricing { display: flex; flex-wrap: wrap; gap: 18px; }
+  .price-card {
+    flex: 1 1 260px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 26px 26px 20px; position: relative; margin-top: 14px;
+  }
+  .price-card.featured { border: 2px solid var(--gold); box-shadow: 0 10px 34px rgba(201,168,76,.16); }
+  .price-card .p-tag {
+    position: absolute; top: -12px; left: 20px;
+    background: var(--navy); color: #fff; font-size: 12px; font-weight: 700;
+    padding: 3px 12px; border-radius: 12px;
+  }
+  .price-card.featured .p-tag { background: var(--gold); }
+  .price-card .price { font-size: 30px; font-weight: 800; color: var(--navy); margin: 8px 0 2px; }
+  .price-card .p-meta { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .price-card ul { padding-left: 18px; margin-bottom: 12px; }
+  .price-card li { font-size: 13px; color: #3c4854; margin-bottom: 6px; }
+  .price-card .p-out { font-size: 12px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 36px 24px 34px; }
+    .hero h1 { font-size: 26px; }
+    .verdict { padding: 24px; gap: 18px; }
+    .score-row { flex-wrap: wrap; }
+    .score-row .dim { flex: 0 0 100%; }
+    .score-row .note { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="kicker">PRODUCT SOLUTION</span>
+    <h1>别墅智能分房系统 · 产品方案</h1>
+    <div class="sub">面向会务/展会场景的 B 端智能分房工具：将报名表导入后，按「全董」团队维度拖拽排房，实现单人升级计费、奖励房型约束、拼房协同、校验提交与报表导出的一体化闭环。</div>
+    <div class="meta">
+      <span>文档类型：产品方案</span>
+      <span>版本：v1.0（含工作量与报价）</span>
+      <span>编制：产品经理 Agent</span>
+      <span>日期：2026-09-11</span>
+    </div>
+  </div>
+
+  <!-- 可行性评估 -->
+  <section>
+    <div class="section-header">
+      <div class="num">★</div>
+      <h2>需求可行性评估</h2>
+      <div class="en">FEASIBILITY ASSESSMENT</div>
+    </div>
+
+    <div class="verdict">
+      <div class="score-ring"><div class="val"><b>78</b><span>/ 100</span></div></div>
+      <div class="txt">
+        <div class="title">结论：<em>高可行，建议推进，但需先补齐边界</em></div>
+        <p>这是一份「照图开发」级的需求 —— 客户已在 PPT 中细化到交互弹窗、状态色块、Excel 字段映射，沟通成本低。技术无算法门槛，核心工作量在于 <b style="color:#fff">业务规则补齐 + 拖拽交互打磨 + 数据规范治理</b>。综合可行性 78/100，属于 B 端工具里难得的高确定性项目。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>分维度评分</h3>
+      <div class="score-row">
+        <div class="dim">需求明确度</div>
+        <div class="bar"><i style="width:82%; background:var(--green)"></i></div>
+        <div class="sc">82</div>
+        <div class="note">交互弹窗、状态色块、字段映射均已具象化，可绕过需求调研直接进入设计</div>
+      </div>
+      <div class="score-row">
+        <div class="dim">技术可行性</div>
+        <div class="bar"><i style="width:90%; background:var(--green)"></i></div>
+        <div class="sc">90</div>
+        <div class="note">拖拽 + 分组 + Excel 导入导出 + 支付，标准 CRUD + 拖拽组件，无算法难点</div>
+      </div>
+      <div class="score-row">
+        <div class="dim">数据可行性</div>
+        <div class="bar"><i style="width:72%; background:#e0a72e"></i></div>
+        <div class="sc">72</div>
+        <div class="note">字段列映射已给出（M/D/G/H/C/K/L），但强依赖 Excel 格式规范，需做导入校验</div>
+      </div>
+      <div class="score-row">
+        <div class="dim">业务规则完整度</div>
+        <div class="bar"><i style="width:68%; background:#e0a72e"></i></div>
+        <div class="sc">68</div>
+        <div class="note">分房/升级/奖励房型规则清晰，但并发、动态新增、男女约束存在空白</div>
+      </div>
+      <div class="score-row">
+        <div class="dim">协同与权限</div>
+        <div class="bar"><i style="width:55%; background:var(--orange)"></i></div>
+        <div class="sc">55</div>
+        <div class="note">多会务组是否并发操作同一分房组、谁能看谁的数据，PPT 未定义 ★ 重点待确认</div>
+      </div>
+      <div class="score-row">
+        <div class="dim">投入产出 ROI</div>
+        <div class="bar"><i style="width:70%; background:#e0a72e"></i></div>
+        <div class="sc">70</div>
+        <div class="note">一次交付 vs 多场复用 SaaS，取决于活动复办频率，直接影响定价与架构</div>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <b>一句话判断：</b>需求本身「明确且能做」，最大的不确定不在技术实现，而在 <b>9 个业务规则待确认项</b>（见文末清单）。只要把并发协同、数据导入规范、动态新增别墅、支付方式这 4 个硬点聊透，本项目可快速进入 MVP 交付。
+    </div>
+  </section>
+
+  <!-- 一、方案概述 -->
+  <section>
+    <div class="section-header">
+      <div class="num">1</div>
+      <h2>方案概述</h2>
+      <div class="en">OVERVIEW</div>
+    </div>
+
+    <div class="card">
+      <h3>1.1 项目背景</h3>
+      <p>客户是一家举办大型激励/表彰类展会（含<b>获奖人员、销售精英、团队（全董）</b>）的企业。活动期间需将参会人员分配入住<b>别墅 A（7 栋）与别墅 B（2 栋）</b>，涉及双床房、大床房、浴缸大床房等多种房型与单人付费升级。</p>
+      <p>当前分房依赖 <b>Excel 手工排房</b>，痛点明显：分配状态靠人工标记、单人升级费用靠人算、跨团队拼房靠口头协调、错误率高且无法实时同步。客户已用 PPT 完整梳理出期望的流程与交互框架，希望落成一套<b>可操作的智能分房系统</b>。</p>
+    </div>
+
+    <div class="card">
+      <h3>1.2 产品定位</h3>
+      <p>一句话定义：<b>「别墅智能分房系统」是面向会务运营/团队负责人的 B 端效率工具</b>，把「报名→分房→计费→校验→报表」全流程数字化，用拖拽替代手工排表。</p>
+      <div class="module-grid" style="margin-top:14px">
+        <div class="module-card" style="border-top-color:var(--navy)"><h4><span class="tag tag-blue">平台端</span>会务运营后台</h4><p>数据导入、别墅资源管理、全局分房监控、报表导出</p></div>
+        <div class="module-card" style="border-top-color:var(--gold)"><h4><span class="tag tag-gold">B 端</span>团队分房工作台</h4><p>以「全董」为单位的拖拽排房、升级计费、提交</p></div>
+        <div class="module-card" style="border-top-color:var(--green)"><h4><span class="tag tag-green">结算</span>付费升级闭环</h4><p>单人升级 3200 元/间/全程的汇总、付款与标记回写</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1.3 业务场景（用户故事）</h3>
+      <p style="color:#4a5561;font-size:13.5px">每个场景用客户/使用者原话代入，覆盖三个核心角色。</p>
+
+      <div style="margin-top:16px">
+        <div class="tag tag-blue">平台端 · 会务运营</div>
+        <div class="callout" style="margin-top:8px"><b>「我把报名表丢进去，就能按每个全董看到还有谁没排、哪栋别墅没住满。」</b></div>
+        <p>作为会务运营，我希望导入报名 Excel 后系统自动按「全董」（表单 M 列）分组、并按性别（D 列）计数，以便一眼掌握每个团队的分房进度与剩余床位。核心旅程：<span class="steps"><span class="step">导入表单</span><span class="arrow">→</span><span class="step">自动分组计数</span><span class="arrow">→</span><span class="step">查看进度/空房</span></span></p>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="tag tag-gold">B 端 · 团队负责人/全董</div>
+        <div class="callout" style="margin-top:8px"><b>「我拖一个人进房间，他就从待分配名单消失，房间床位实时更新。」</b></div>
+        <p>作为全董，我希望通过拖拽把团队成员安排进指定别墅房间，房间状态从 0/2 → 1/2 → 2/2 自动流转，以便快速完成分房并随时重排。涉及模块：拖拽排房、重排房间、升级单人入住。</p>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="tag tag-green">结算 · 财务/收费</div>
+        <div class="callout" style="margin-top:8px"><b>「谁升级了单人房、该收多少钱，系统自动算好，我直接出账单。」</b></div>
+        <p>作为财务人员，我希望系统对「付费升级单人入住」按 3200 元/间/全程自动计数汇总，回写 H 列标记，以便一键收款与对账。涉及模块：升级计费、付款、报表导出。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1.4 核心问题与解决思路</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>核心问题</th><th>根因</th><th>解决思路</th></tr></thead>
+          <tbody>
+            <tr><td class="hl">分房靠手工、易出错</td><td>Excel 表格 + 人工标记，状态不同步</td><td>拖拽排房 + 房间状态（0/2、1/1、1/2、2/2）自动流转</td></tr>
+            <tr><td class="hl">进度不透明</td><td>各团队分房数据割裂</td><td>按「全董」分组，实时展示已分/未分、占床数量、剩余床位</td></tr>
+            <tr><td class="hl">升级费用算不准</td><td>单人升级靠人工计数计费</td><td>升级操作自动计数，金额=数量×3200 元，回写 H 列</td></tr>
+            <tr><td class="hl">奖励/房型约束漏安排</td><td>获奖人员需住浴缸大床等规则散落</td><td>获奖标签强提示 + 单人入住标记（G 列 Y）锁死升级按钮</td></tr>
+            <tr><td class="hl">拼房协调困难</td><td>跨团队拼别墅靠口头/线下</td><td>「拼别墅人数」可视化，会务组统筹兜底</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1.5 方案要点</h3>
+      <div class="module-grid">
+        <div class="module-card"><h4>① 三栏式分房工作台</h4><p>左=分房进度，中=别墅明细，右=待分配名单，一屏完成排房</p></div>
+        <div class="module-card"><h4>② 拖拽 + 状态机驱动</h4><p>房间状态自动计算，满房蓝块/未满橘块，一眼可辨</p></div>
+        <div class="module-card"><h4>③ 计费闭环</h4><p>升级→计数→汇总→付款，3200 元/间/全程自动累计</p></div>
+        <div class="module-card"><h4>④ Excel 双通道</h4><p>表单列映射导入 + 报表标准导出，无缝衔接现有流程</p></div>
+        <div class="module-card"><h4>⑤ 规则校验兜底</h4><p>提交前验证「待分配=0 且空别墅≤1」，拦截漏排/空房</p></div>
+        <div class="module-card"><h4>⑥ 预留复用架构</h4><p>按「活动」维度设计，为多场复用 SaaS 化留空间</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1.6 总体架构</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>层次</th><th>职责</th><th>包含模块</th></tr></thead>
+          <tbody>
+            <tr><td class="hl">触达层</td><td>多角色 UI 入口</td><td>会务运营后台、团队分房工作台、付费引导页</td></tr>
+            <tr><td class="hl">业务逻辑层</td><td>核心规则引擎</td><td>分房引擎、状态机、升级计费、校验规则</td></tr>
+            <tr><td class="hl">数据层</td><td>结构化存储</td><td>人员、别墅/房间、分配关系、升级标记、活动</td></tr>
+            <tr><td class="hl">集成层</td><td>外部对接</td><td>Excel 导入导出、支付、报表</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <b>一句话总结：</b>把客户已想清楚的「手工排房流程」数字化，用拖拽 + 状态机 + 自动计费，把一次活动的分房从「数天排表」压缩到「数小时提交」，并为多场复用的 SaaS 化预留架构。
+    </div>
+  </section>
+
+  <!-- 二、方案说明 -->
+  <section>
+    <div class="section-header">
+      <div class="num">2</div>
+      <h2>方案说明</h2>
+      <div class="en">SOLUTION DETAILS</div>
+    </div>
+
+    <div class="card">
+      <h3>2.0 模块清单汇总</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>端</th><th>模块</th><th>定位</th><th>核心价值</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-blue">平台端</span></td><td class="hl">报名数据导入</td><td>Excel 列映射导入 + 校验</td><td>消除手工录入，一键建库</td></tr>
+            <tr><td><span class="tag tag-blue">平台端</span></td><td class="hl">别墅资源管理</td><td>别墅/房型/床位与预分配</td><td>资源可配、支持动态新增 B 别墅</td></tr>
+            <tr><td><span class="tag tag-gold">B 端</span></td><td class="hl">分房工作台</td><td>三栏式拖拽排房界面</td><td>一屏完成排房与进度查看</td></tr>
+            <tr><td><span class="tag tag-gold">B 端</span></td><td class="hl">拖拽排房与重排</td><td>拖入/拖出、整间重排</td><td>替代手工排表，状态自动流转</td></tr>
+            <tr><td><span class="tag tag-gold">B 端</span></td><td class="hl">升级计费</td><td>单人升级 + 3200 元计费</td><td>费用自动汇总，回写 H 列</td></tr>
+            <tr><td><span class="tag tag-gold">B 端</span></td><td class="hl">搜索/筛选/排序</td><td>名单检索与顺位排序</td><td>快速定位，按 RSE→SE 排序</td></tr>
+            <tr><td><span class="tag tag-green">结算</span></td><td class="hl">校验与提交</td><td>提交前规则验证</td><td>拦截漏排与多套空房</td></tr>
+            <tr><td><span class="tag tag-green">结算</span></td><td class="hl">付款</td><td>升级费用汇总收款</td><td>计费→支付闭环</td></tr>
+            <tr><td><span class="tag tag-green">结算</span></td><td class="hl">报表导出</td><td>标准字段导出</td><td>复盘与对账依据</td></tr>
+            <tr><td><span class="tag tag-blue">平台端</span></td><td class="hl">权限与协同</td><td>角色、数据范围、并发</td><td>多会务组安全协作（待确认）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>2.1 报名数据导入模块</h3>
+      <ul>
+        <li>按活动导入报名 Excel，解析已有字段映射：<b>C 列姓名 / D 列性别 / M 列全董 / K 列上手董事 / L 列上手区董 / G 列单人入住标记 / H 列付费升级标记</b>。</li>
+        <li>导入后按「全董」分组，计算该全董下报名人数、男女性别分类计数。</li>
+        <li>提供<b>导入校验</b>：必填缺失、列错位、重复报名号时给出报错提示，避免脏数据进入排房。</li>
+      </ul>
+      <div class="tag tag-orange">待确认：Excel 版本与列固定规则、报名号是否唯一键</div>
+    </div>
+
+    <div class="card">
+      <h3>2.2 别墅资源管理模块</h3>
+      <ul>
+        <li>维护别墅 A（7 栋）与别墅 B（2 栋），房型分别为：<b>A=1-双床 / 2-双床 / 3-浴缸大床；B=1-双床 / 2-大床 / 3-浴缸大床</b>。</li>
+        <li>支持「活动组提前预分配别墅数量」，当总床位需求 &gt; 原预分配床位总量时，可<b>新增 1 间别墅 B</b> 参与分配。</li>
+        <li>展示每间房的分配状态：<b>0/2 未分配、1/1 单人入住、1/2 未住满、2/2 已排满</b>；满房蓝块、未满橘块。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>2.3 分房工作台（核心交互）</h3>
+      <p>采用<b>三栏布局</b>，一屏完成排房：</p>
+      <ul>
+        <li><b>左侧 · 分房进度栏</b>：展示该全董下「已分房人数/总人数」、未排满别墅的已安排人数、剩余待排床位数。</li>
+        <li><b>中间 · 别墅明细栏</b>：别墅号（系统自动生成：别墅类型-全董编号-别墅号）+ 各房间床位状态色块。</li>
+        <li><b>右侧 · 待分配名单栏</b>：显示待分配人员卡片，含报名号、姓名、性别、同住意愿、是否愿拼大床、上手董事/区董、单人入住/获奖标签；<b>男女用不同底色框</b>。</li>
+      </ul>
+      <p>剩余待排床位数计算公式：<b>M 列计数 + G 列 Y 计数 + H 列付费升级单人入住数 − 已排人数</b>。</p>
+    </div>
+
+    <div class="card">
+      <h3>2.4 拖拽排房与重排模块</h3>
+      <ul>
+        <li>拖动名单中的名字至目标房间，名字落入房间并显示，<b>右侧名单同步移除</b>。</li>
+        <li>每个房间提供<b>「重排房间」</b>按钮：点击后该房间所有已分配人员返回右侧名单。</li>
+        <li>房间状态随操作自动更新，满房/未满颜色实时刷新。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>2.5 升级计费模块（含获奖约束）</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景</th><th>规则</th><th>费用</th></tr></thead>
+          <tbody>
+            <tr><td>付费升级单人入住</td><td>弹窗确认后计入单人入住，房间置为 1/1，回写 H 列 Y</td><td class="hl">3200 元/间/全程</td></tr>
+            <tr><td>免费单人入住（G 列 Y）</td><td>如「至臻区董已付」「获奖人员单人入住」，升级按钮置灰不可用</td><td>0</td></tr>
+            <tr><td>获奖人员</td><td>需入住浴缸大床房，卡片展示「获奖提示」标签</td><td>—</td></tr>
+            <tr><td>取消升级</td><td>再次弹窗确认，取消后房间恢复可拼状态</td><td>费用退回</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tag tag-orange">待确认：获奖人员的「浴缸大床」是硬约束还是软约束？浴缸大床不足时如何降级</div>
+    </div>
+
+    <div class="card">
+      <h3>2.6 搜索/筛选/排序模块</h3>
+      <ul>
+        <li><b>搜索</b>：通过姓名 / 上手区董 / 上手董事进行搜索。</li>
+        <li><b>筛选</b>：按姓名、SE、RSE、性别做模糊查找。</li>
+        <li><b>排序</b>：顺位排序，主要关键字 RSE、次要关键字 SE。</li>
+      </ul>
+      <div class="tag tag-orange">待确认：SE / RSE 的准确定义与层级含义（推测为销售精英/区域销售精英）</div>
+    </div>
+
+    <div class="card">
+      <h3>2.7 校验与提交模块</h3>
+      <ul>
+        <li>提交条件：<b>每个账号待分配人数 = 0，且未排满别墅数量 ≤ 1</b>。</li>
+        <li>待分配人数 &gt; 0 → 提示「还有人员未分配别墅，请分配好后再提交」。</li>
+        <li>未排满别墅数量 &gt; 1 → 提示「您有多套别墅出现空房，请分配好后再提交」。</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>2.8 付款模块</h3>
+      <ul>
+        <li>有勾选升级单人入住的，按<b>数量 × 3200 元/间/全程</b>计总后跳转付款。</li>
+        <li>付款成功后回写标记，生成可对账单据。</li>
+      </ul>
+      <div class="tag tag-orange">待确认：收款渠道（微信/支付宝/线下对账）、退款与开票流程</div>
+    </div>
+
+    <div class="card">
+      <h3>2.9 报表导出模块</h3>
+      <p>按标准字段导出，覆盖：<b>报名号、全董姓名、实际出行人、性别、同住意愿、愿意双人大床、单人入住、全董付费升级、别墅号、房间号、上手董事、上手区董、获奖/特殊说明、备注</b>。</p>
+      <div class="tag tag-orange">待确认：报表格式（Excel/PDF）、「备注/特殊说明」字段来源</div>
+    </div>
+
+    <div class="card">
+      <h3>2.10 权限与协同模块</h3>
+      <ul>
+        <li>角色分层：会务组（全局）、全董/团队负责人（本团队数据范围）。</li>
+        <li>跨团队拼别墅人数可视化，会务组统筹兜底。</li>
+      </ul>
+      <div class="highlight"><b>重点风险：</b>PPT 未定义<b>多人并发</b>——若多个会务组同时编辑同一「全董」分组，会出现覆盖冲突，需明确锁定/冲突提示机制。</div>
+    </div>
+  </section>
+
+  <!-- 三、难易程度评估 -->
+  <section>
+    <div class="section-header">
+      <div class="num">3</div>
+      <h2>难易程度评估</h2>
+      <div class="en">DIFFICULTY ASSESSMENT</div>
+    </div>
+
+    <div class="highlight">
+      <b>总体判断：</b>本项目<b>整体不难</b>，真正的难点只有 3 处，且<b>都不在「技术实现」本身，而在业务规则与边界</b>。只要守住「手动拖拽 + 单人单机 + 线下对账」这条边界，就是 2~3 周可交付的普通 B 端工具；一旦加入并发、自动排房、线上支付任何一项，难度与报价都会往上跳一档。
+    </div>
+
+    <div class="card">
+      <h3>模块难度三档</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:90px">难度</th><th>涉及模块</th><th>原因</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">简单</span></td><td>分房进度看板、别墅明细/详情、报表导出、验证提交、房型配置</td><td>标准「查数据 + 展示」，字段已定、无算法，纯增删改查</td></tr>
+            <tr><td><span class="tag tag-orange">中等</span></td><td>报名数据导入、待分配名单（搜索/筛选）、拖拽排房、单人升级计费</td><td>需打磨交互与容错：拖拽手感、列表实时同步、导入容错、升级免费/付费/取消分支</td></tr>
+            <tr><td><span class="tag tag-red">较难</span></td><td>多人并发协同、自动排房算法、线上支付对接</td><td>见下方「三个真难点」，均为架构/算法/金融级问题</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>三个真难点（决定工期与报价）</h3>
+      <div class="confirm-item"><div class="q">1</div><div class="body"><b>多人并发协同</b><p>若多个会务组同时编辑同一「全董」分组，涉及实时同步、占用锁、冲突提示，是架构级问题，工作量可能翻倍；若「一人排完另一人再排」则完全不构成难点。</p></div></div>
+      <div class="confirm-item"><div class="q">2</div><div class="body"><b>自动排房算法</b><p>本项目的<b>难度分叉点</b>：客户 PPT 已是「手动拖人进房」，技术简单、难在拖拽体验；若实际要「系统按获奖住浴缸大床 / 男女不混住 / 同住配对 / 尽量装满」一键自动分配，则升级为<b>约束求解问题（相当于排课/排班系统）</b>，难度与工期指数级上升。</p></div></div>
+      <div class="confirm-item"><div class="q">3</div><div class="body"><b>线上支付对接</b><p>3200 元/间若走微信/支付宝线上支付，涉及支付回调、退款、对账，中等偏难；若仅「先算金额、线下来回收款」，则基本无需开发。</p></div></div>
+    </div>
+
+    <div class="callout">
+      <b>一句话：</b>「好做」的边界很清楚——<b>手动拖拽 + 单人单机 + 线下对账</b>；任一升级为「自动排房 / 多人协同 / 线上支付」，难度与报价上跳一档，须回到待确认清单重新评估。
+    </div>
+  </section>
+
+  <!-- 四、工作量评估 -->
+  <section>
+    <div class="section-header">
+      <div class="num">4</div>
+      <h2>工作量评估</h2>
+      <div class="en">WORKLOAD ESTIMATE</div>
+    </div>
+
+    <div class="card">
+      <p><b>估算口径：</b>以「手动拖拽 + 单人单机 + 线下对账」为标准版默认口径；团队为「产品设计 + 前端 + 后端 + 测试」混合小队；工时含需求澄清、设计、开发、联调、测试与项目管理。单价基准见报价模块。</p>
+      <div class="table-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th style="width:44px">#</th><th>模块</th><th style="width:110px">难度</th><th style="width:80px">人天</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td class="hl">需求澄清 + 原型修订</td><td>—</td><td>2</td></tr>
+            <tr><td>2</td><td class="hl">UI 视觉设计</td><td>—</td><td>4</td></tr>
+            <tr><td>3</td><td class="hl">报名数据导入（Excel 解析 / 列映射 / 校验）</td><td><span class="tag tag-orange">中等</span></td><td>6</td></tr>
+            <tr><td>4</td><td class="hl">别墅资源管理（A/B 房型 + 状态机）</td><td><span class="tag tag-green">简单</span></td><td>4</td></tr>
+            <tr><td>5</td><td class="hl">分房进度看板</td><td><span class="tag tag-green">简单</span></td><td>3</td></tr>
+            <tr><td>6</td><td class="hl">别墅明细视图 + 详情页</td><td><span class="tag tag-orange">中等</span></td><td>5</td></tr>
+            <tr><td>7</td><td class="hl">待分配名单（搜索 / 筛选 / 排序）</td><td><span class="tag tag-orange">中等</span></td><td>4</td></tr>
+            <tr><td>8</td><td class="hl">拖拽排房 + 重排</td><td><span class="tag tag-red">较难</span></td><td>7</td></tr>
+            <tr><td>9</td><td class="hl">单人升级计费（含获奖约束 / 取消升级）</td><td><span class="tag tag-orange">中等</span></td><td>5</td></tr>
+            <tr><td>10</td><td class="hl">验证提交</td><td><span class="tag tag-green">简单</span></td><td>2</td></tr>
+            <tr><td>11</td><td class="hl">付款（线下对账版）</td><td><span class="tag tag-green">简单</span></td><td>3</td></tr>
+            <tr><td>12</td><td class="hl">报表导出</td><td><span class="tag tag-green">简单</span></td><td>3</td></tr>
+            <tr><td>13</td><td class="hl">登录 / 账号 / 权限</td><td><span class="tag tag-orange">中等</span></td><td>4</td></tr>
+            <tr><td>14</td><td class="hl">联调 / 测试 / 修复</td><td>—</td><td>6</td></tr>
+            <tr><td>15</td><td class="hl">项目管理 / 部署上线</td><td>—</td><td>4</td></tr>
+            <tr><td></td><td class="hl" style="text-align:right">合计（标准版）</td><td></td><td><b>62</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 五、报价方案 -->
+  <section>
+    <div class="section-header">
+      <div class="num">5</div>
+      <h2>报价方案</h2>
+      <div class="en">PRICING</div>
+    </div>
+
+    <div class="pricing">
+      <div class="price-card">
+        <div class="p-tag">A · MVP 基础版</div>
+        <div class="price">¥80,000</div>
+        <div class="p-meta">40 人天 · 约 3 周</div>
+        <ul>
+          <li>报名数据导入 + 分组</li>
+          <li>别墅资源与房型配置</li>
+          <li>三栏分房工作台</li>
+          <li>拖拽排房 + 重排</li>
+          <li>状态色块 + 报表导出</li>
+          <li>基础登录</li>
+        </ul>
+        <div class="p-out">不含：升级计费、付款、搜索排序、并发</div>
+      </div>
+      <div class="price-card featured">
+        <div class="p-tag">B · 标准版（推荐）</div>
+        <div class="price">¥124,000</div>
+        <div class="p-meta">62 人天 · 约 5-6 周</div>
+        <ul>
+          <li>MVP 全部功能</li>
+          <li>单人升级计费（3200 元）</li>
+          <li>获奖约束 + 校验提交</li>
+          <li>付款（线下对账）+ 标记回写</li>
+          <li>搜索 / 筛选 / 排序</li>
+          <li>账号与角色权限</li>
+        </ul>
+        <div class="p-out">不含：多人并发、自动排房、线上支付</div>
+      </div>
+      <div class="price-card">
+        <div class="p-tag">C · 完整版</div>
+        <div class="price">¥190,000</div>
+        <div class="p-meta">95 人天 · 约 8-10 周</div>
+        <ul>
+          <li>标准版全部功能</li>
+          <li>多人并发协同 + 锁定</li>
+          <li>多活动复用（活动维度）</li>
+          <li>SaaS 化 / 历史留存</li>
+          <li>完整权限体系</li>
+        </ul>
+        <div class="p-out">线上支付、自动排房另计</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3>报价说明</h3>
+      <ul>
+        <li><b>单价基准：2000 元/人天</b>（含产品设计、开发、测试、项目管理）。</li>
+        <li><b>以上报价不含税</b>，如需开票另加 6% 增值税。</li>
+        <li><b>建议付款节奏：</b>30% 预付款 + 40% 里程碑款（原型确认后）+ 30% 验收款（上线交付后）。</li>
+        <li><b>报价边界：</b>均基于「手动拖拽 + 单人单机 + 线下对账」的默认口径。凡涉及 <b>多人并发协同、自动排房算法、线上支付（微信/支付宝）</b> 任一，需回到待确认清单重新评估；其中「完整版」已含并发，但支付对接与自动排房需另行报价。</li>
+      </ul>
+      <div class="highlight"><b>主推建议：</b>以 <b>B 标准版</b>为成交标的，先跑通完整闭环；若后续复办确认多场复用，再升级到 C 完整版（架构已预留活动维度，升级成本可控）。</div>
+    </div>
+  </section>
+
+  <!-- 六、待确认清单 -->
+  <section>
+    <div class="section-header">
+      <div class="num">6</div>
+      <h2>待确认清单</h2>
+      <div class="en">CONFIRM LIST</div>
+    </div>
+
+    <div class="card">
+      <p style="color:#4a5561;font-size:13.5px;margin-bottom:16px">以下是影响架构与报价的关键空白点，<b>立项前需与客户逐条对齐</b>。前 4 条为「硬点」，直接决定技术方案与工期报价。</p>
+
+      <div class="confirm-item"><div class="q">1</div><div class="body"><b>多人协同与并发（最优先）</b><p>多个会务组是否同时操作同一「全董」分组？是否需要实时协作、锁定/冲突提示？这决定是「单人单机工具」还是「多人协同系统」。</p></div></div>
+
+      <div class="confirm-item"><div class="q">2</div><div class="body"><b>Excel 数据规范</b><p>报名表单的列是否可固定？报名号是否唯一？是否需要导入前的格式模板与校验规则。</p></div></div>
+
+      <div class="confirm-item"><div class="q">3</div><div class="body"><b>动态新增别墅 B 的规则</b><p>「总床位需求 &gt; 预分配床位」时新增 1 间别墅 B，谁来触发？是否需审批？是否可多次新增？</p></div></div>
+
+      <div class="confirm-item"><div class="q">4</div><div class="body"><b>付款方式</b><p>3200 元收款走线上支付（微信/支付宝）还是线下对账？是否需要退款、开票、支付回调闭环。</p></div></div>
+
+      <div class="confirm-item"><div class="q">5</div><div class="body"><b>获奖人员房型约束</b><p>「获奖需入住浴缸大床」是硬约束还是软约束？浴缸大床不足时的降级与提示逻辑。</p></div></div>
+
+      <div class="confirm-item"><div class="q">6</div><div class="body"><b>男女/同住约束</b><p>「同住意愿」「愿意拼大床」是否参与自动排房，还是仅作参考、纯手动拖拽？男女生底色是否用于校验混住冲突。</p></div></div>
+
+      <div class="confirm-item"><div class="q">7</div><div class="body"><b>系统复用性</b><p>是一次性活动交付，还是多场复用的 SaaS 工具？影响是否有「活动」维度、账号体系、历史数据留存。</p></div></div>
+
+      <div class="confirm-item"><div class="q">8</div><div class="body"><b>权限边界</b><p>全董能否自助操作自己的分房，还是仅会务组代操作？不同全董之间的数据是否隔离。</p></div></div>
+
+      <div class="confirm-item"><div class="q">9</div><div class="body"><b>术语确认</b><p>「全董」「上手董事/上手区董」「TOP SE / TOP RSE」等内部称谓的精确定义与层级关系，避免理解偏差。</p></div></div>
+    </div>
+  </section>
+
+  <!-- 四、实施路线图 -->
+  <section>
+    <div class="section-header">
+      <div class="num">4</div>
+      <h2>实施路线图</h2>
+      <div class="en">ROADMAP</div>
+    </div>
+
+    <div class="roadmap">
+      <div class="phase">
+        <div class="p-tag">P0 · MVP</div>
+        <h4>2-3 周 · 跑通核心</h4>
+        <ul>
+          <li>Excel 导入 + 分组计数</li>
+          <li>别墅资源与床位配置</li>
+          <li>三栏分房工作台 + 拖拽排房</li>
+          <li>房间状态色块展示</li>
+          <li>报表导出</li>
+        </ul>
+      </div>
+      <div class="phase gold">
+        <div class="p-tag">P1 · 增强</div>
+        <h4>4-6 周 · 补齐闭环</h4>
+        <ul>
+          <li>单人升级 + 3200 计费</li>
+          <li>付款与标记回写</li>
+          <li>获奖/单人约束 + 校验提交</li>
+          <li>动态新增别墅 B</li>
+          <li>搜索/筛选/排序</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="p-tag">P2 · 规模</div>
+        <h4>后续 · 复用协同</h4>
+        <ul>
+          <li>多人协同 + 并发锁定</li>
+          <li>多活动复用（活动维度）</li>
+          <li>账号体系与角色权限</li>
+          <li>SaaS 化 / 数据看板</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:18px">
+      <b>立项建议：</b>先以 P0+P1 一次性交付验收为里程碑，P2 的协同与复用能力待「待确认项 1、7」明确后再纳入报价，避免前期过度设计。
+    </div>
+  </section>
+
+  <!-- 八、预期效果 -->
+  <section>
+    <div class="section-header">
+      <div class="num">8</div>
+      <h2>预期效果</h2>
+      <div class="en">EXPECTED OUTCOME</div>
+    </div>
+
+    <div class="module-grid">
+      <div class="module-card" style="border-top-color:var(--green)"><h4>排房效率显著提升</h4><p>从手工 Excel 数天排表，压缩到数小时内完成并提交，减少重复沟通。</p></div>
+      <div class="module-card" style="border-top-color:var(--green)"><h4>错误率大幅下降</h4><p>房间状态自动计算、提交前规则校验，杜绝漏排、多套空房、算错床位。</p></div>
+      <div class="module-card" style="border-top-color:var(--gold)"><h4>计费准确可对账</h4><p>升级数量与 3200 元金额自动汇总，H 列回写，收款闭环可追溯。</p></div>
+      <div class="module-card" style="border-top-color:var(--navy)"><h4>沉淀可复用资产</h4><p>一次开发，多场活动可复用，为后续 SaaS 化或售卖给同类会务公司埋点。</p></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
