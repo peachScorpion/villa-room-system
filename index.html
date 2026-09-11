@@ -58,6 +58,8 @@
   .layout-img img { max-width: 100%; width: 100%; border-radius: 12px; display: block; }
   .layout-caption { padding: 11px 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
   .src-note { font-size: 11px; color: var(--gold-strong); font-weight: 600; margin-left: auto; }
+  .owner-select { border: 1px solid var(--line-2); background: #fff; border-radius: 9px; padding: 8px 13px; font-size: 13.5px; font-weight: 700; color: var(--text); cursor: pointer; outline: none; }
+  .owner-select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79,90,232,.1); }
 
 
   .workspace { flex: 1; display: flex; overflow: hidden; }
@@ -265,6 +267,7 @@
 
   <div class="topbar">
     <div class="logo"><span class="ico">墅</span>别墅智能分房系统</div>
+    <select class="owner-select" id="ownerSelect"></select>
     <div class="crumbs" id="crumbs">秋季表彰大会 <span class="sep">/</span> 别墅分房 <span class="sep">/</span> <b>全董分房工作台</b></div>
     <div class="spacer"></div>
     <button class="btn btn-back" id="btnBack" style="display:none">← 返回工作台</button>
@@ -282,7 +285,7 @@
   <div class="workspace" id="viewWorkbench">
     <aside class="col-left">
       <div class="panel-title"><span class="dot"></span>分房进度 · 全董</div>
-      <div class="owner-card"><div class="pname">崔雁飞</div><div class="plabel">全董 · 团队负责人</div></div>
+      <div class="owner-card"><div class="pname" id="ownerName">崔雁飞</div><div class="plabel" id="ownerTitle">全董 · 团队负责人</div></div>
       <div class="prog-block">
         <div class="prog-row"><span>已分房 / 总人数</span><b id="progNum">--</b></div>
         <div class="bar"><i id="progBar" style="width:0%"></i></div>
@@ -387,37 +390,61 @@
 (function(){
   var state = {
     selectedId: null,
-    upgradeFee: 0,
-    upgrades: [],
     paid: false,
     currentVillaTab: 'all',
     villaDetailMode: 'assign',
     payMethod: 'offline',
     personFilter: { search: '', sex: 'all' },
     sortBy: 'rse',
-    persons: [
-      { id:'p1', name:'余梦',    sex:'f', se:'TOP SE', rse:'TOP RSE', rank:[1,1], peer:'张三', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
-      { id:'p2', name:'崔帅杰',  sex:'m', se:'TOP SE', rse:'TOP RSE', rank:[1,2], peer:'张三', peerNote:'获奖单人入住', canUpgrade:false, single:true, reward:true, locked:true },
-      { id:'p3', name:'刘芳',    sex:'f', se:'SE',     rse:'RSE',     rank:[2,1], peer:'李四', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
-      { id:'p4', name:'王强',    sex:'m', se:'SE',     rse:'RSE',     rank:[2,2], peer:'赵六', peerNote:'—',          canUpgrade:true, single:true, reward:false }
-    ],
-    rooms: [
-      { id:'a1', villa:'A-0101', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'一一',sex:'f'},{name:'三三',sex:'m'}] },
-      { id:'a2', villa:'A-0101', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'张三',sex:'m'}] },
-      { id:'a3', villa:'A-0101', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'李四',sex:'f'}] },
-      { id:'a4', villa:'A-0102', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'王五',sex:'m'},{name:'赵六',sex:'m'}] },
-      { id:'a5', villa:'A-0102', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'陈七',sex:'f'},{name:'林八',sex:'f'}] },
-      { id:'a6', villa:'A-0102', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'钱九',sex:'m'}] },
-      { id:'b1', villa:'B-0101', type:'B', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'二二',sex:'f'},{name:'四四',sex:'m'}] },
-      { id:'b2', villa:'B-0101', type:'B', roomNo:'2号房', roomType:'大床',    cap:2, residents:[{name:'孙十',sex:'f'},{name:'周十一',sex:'f'}] },
-      { id:'b3', villa:'B-0101', type:'B', roomNo:'3号房', roomType:'浴缸大床', cap:2, residents:[{name:'吴十二',sex:'m'},{name:'郑十三',sex:'m'}] }
+    currentOwnerId: 'o1',
+    owners: [
+      {
+        id:'o1', name:'崔雁飞', title:'全董 · 团队负责人',
+        upgradeFee:0, upgrades:[],
+        persons: [
+          { id:'p1', name:'余梦',    sex:'f', se:'TOP SE', rse:'TOP RSE', rank:[1,1], peer:'张三', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
+          { id:'p2', name:'崔帅杰',  sex:'m', se:'TOP SE', rse:'TOP RSE', rank:[1,2], peer:'张三', peerNote:'获奖单人入住', canUpgrade:false, single:true, reward:true, locked:true },
+          { id:'p3', name:'刘芳',    sex:'f', se:'SE',     rse:'RSE',     rank:[2,1], peer:'李四', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
+          { id:'p4', name:'王强',    sex:'m', se:'SE',     rse:'RSE',     rank:[2,2], peer:'赵六', peerNote:'—',          canUpgrade:true, single:true, reward:false }
+        ],
+        rooms: [
+          { id:'a1', villa:'A-0101', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'一一',sex:'f'},{name:'三三',sex:'m'}] },
+          { id:'a2', villa:'A-0101', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'张三',sex:'m'}] },
+          { id:'a3', villa:'A-0101', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'李四',sex:'f'}] },
+          { id:'a4', villa:'A-0102', type:'A', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'王五',sex:'m'},{name:'赵六',sex:'m'}] },
+          { id:'a5', villa:'A-0102', type:'A', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'陈七',sex:'f'},{name:'林八',sex:'f'}] },
+          { id:'a6', villa:'A-0102', type:'A', roomNo:'3号房', roomType:'浴缸大床', cap:1, residents:[{name:'钱九',sex:'m'}] },
+          { id:'b1', villa:'B-0101', type:'B', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'二二',sex:'f'},{name:'四四',sex:'m'}] },
+          { id:'b2', villa:'B-0101', type:'B', roomNo:'2号房', roomType:'大床',    cap:2, residents:[{name:'孙十',sex:'f'},{name:'周十一',sex:'f'}] },
+          { id:'b3', villa:'B-0101', type:'B', roomNo:'3号房', roomType:'浴缸大床', cap:2, residents:[{name:'吴十二',sex:'m'},{name:'郑十三',sex:'m'}] }
+        ]
+      },
+      {
+        id:'o2', name:'李明华', title:'全董 · 团队负责人',
+        upgradeFee:3200, upgrades:[{ name:'陈晓', amount:3200 }],
+        persons: [
+          { id:'q1', name:'陈晓',  sex:'f', se:'SE', rse:'RSE', rank:[2,1], peer:'—',    peerNote:'—',          canUpgrade:true, single:false, reward:false },
+          { id:'q2', name:'赵敏',  sex:'f', se:'SE', rse:'RSE', rank:[2,2], peer:'钱进', peerNote:'愿意拼大床', canUpgrade:true, single:false, reward:false },
+          { id:'q3', name:'孙浩',  sex:'m', se:'SE', rse:'RSE', rank:[2,3], peer:'—',    peerNote:'—',          canUpgrade:true, single:false, reward:false },
+          { id:'q4', name:'周杰',  sex:'m', se:'SE', rse:'RSE', rank:[3,1], peer:'—',    peerNote:'获奖单人入住', canUpgrade:false, single:true, reward:true, locked:true }
+        ],
+        rooms: [
+          { id:'c1', villa:'B-0102', type:'B', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'甲一',sex:'f'},{name:'乙二',sex:'m'}] },
+          { id:'c2', villa:'B-0102', type:'B', roomNo:'2号房', roomType:'大床',    cap:2, residents:[{name:'丙三',sex:'f'}] },
+          { id:'c3', villa:'B-0102', type:'B', roomNo:'3号房', roomType:'浴缸大床', cap:2, residents:[] },
+          { id:'c4', villa:'B-0103', type:'B', roomNo:'1号房', roomType:'双床',    cap:2, residents:[{name:'丁四',sex:'m'},{name:'戊五',sex:'f'}] },
+          { id:'c5', villa:'B-0103', type:'B', roomNo:'2号房', roomType:'双床',    cap:2, residents:[{name:'己六',sex:'m'}] },
+          { id:'c6', villa:'B-0103', type:'B', roomNo:'3号房', roomType:'浴缸大床', cap:2, residents:[] }
+        ]
+      }
     ]
   };
+  function cur(){ return state.owners.filter(function(o){ return o.id === state.currentOwnerId; })[0]; }
 
-  var occupiedCount = function(){ return state.rooms.reduce(function(s,r){ return s + r.residents.length; }, 0); };
-  var getTotal = function(){ return occupiedCount() + state.persons.length; };
-  var villaNames = function(){ var set={}; state.rooms.forEach(function(r){set[r.villa]=true;}); return Object.keys(set).sort(); };
-  var roomsOf = function(vn){ return state.rooms.filter(function(r){return r.villa===vn;}); };
+  var occupiedCount = function(){ return cur().rooms.reduce(function(s,r){ return s + r.residents.length; }, 0); };
+  var getTotal = function(){ return occupiedCount() + cur().persons.length; };
+  var villaNames = function(){ var set={}; cur().rooms.forEach(function(r){set[r.villa]=true;}); return Object.keys(set).sort(); };
+  var roomsOf = function(vn){ return cur().rooms.filter(function(r){return r.villa===vn;}); };
 
   function toast(msg, type){
     var t = document.getElementById('toast');
@@ -455,20 +482,22 @@
 
   // ===== 左栏 =====
   function renderLeft(){
+    document.getElementById('ownerName').textContent = cur().name;
+    document.getElementById('ownerTitle').textContent = cur().title;
     var total = getTotal(), occ = occupiedCount();
     document.getElementById('progNum').textContent = occ + ' / ' + total;
     document.getElementById('progBar').style.width = total ? (occ/total*100) + '%' : '0%';
     document.getElementById('statTotal').textContent = total + ' 人';
     var m = 0, f = 0;
-    state.persons.forEach(function(p){ if(p.sex==='m') m++; else f++; });
-    state.rooms.forEach(function(r){ r.residents.forEach(function(x){ if(x.sex==='m') m++; else f++; }); });
+    cur().persons.forEach(function(p){ if(p.sex==='m') m++; else f++; });
+    cur().rooms.forEach(function(r){ r.residents.forEach(function(x){ if(x.sex==='m') m++; else f++; }); });
     document.getElementById('statSex').textContent = m + ' / ' + f;
-    var remainBed = state.rooms.reduce(function(s,r){ return s + Math.max(0, r.cap - r.residents.length); }, 0);
+    var remainBed = cur().rooms.reduce(function(s,r){ return s + Math.max(0, r.cap - r.residents.length); }, 0);
     document.getElementById('statRemain').textContent = remainBed;
     var freeVillas = {};
-    state.rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
+    cur().rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
     document.getElementById('statRoom').textContent = Object.keys(freeVillas).length + ' 套';
-    document.getElementById('statFee').textContent = '￥' + state.upgradeFee.toLocaleString();
+    document.getElementById('statFee').textContent = '￥' + cur().upgradeFee.toLocaleString();
   }
 
   // ===== 中栏 =====
@@ -494,7 +523,7 @@
       var full = occ >= cap;
       var remain = Math.max(0, cap - occ);
       html += '<div class="villa-summary" data-villa-summary="'+vn+'">'
-        + '<div class="vs-head"><span class="vs-villa">'+vn+'</span><span class="vs-type">崔雁飞团队</span><span class="spacer"></span>'
+        + '<div class="vs-head"><span class="vs-villa">'+vn+'</span><span class="vs-type">'+cur().name+'团队</span><span class="spacer"></span>'
         + '<span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span></div>'
         + '<div class="vs-bar-row"><span>占床</span><b>'+occ+' / '+cap+'</b></div>'
         + '<div class="bar"><i style="width:'+(cap?(occ/cap*100):0)+'%"></i></div>'
@@ -511,7 +540,7 @@
     var occ = rooms.reduce(function(s,r){return s+r.residents.length;},0);
     var cap = rooms.reduce(function(s,r){return s+r.cap;},0);
     var full = occ >= cap;
-    var head = '<div class="one-villa-head"><div><div class="ov-villa">'+vn+'</div><div class="ov-type">崔雁飞团队 · '+rooms.length+' 间房</div></div><div class="spacer"></div>'
+    var head = '<div class="one-villa-head"><div><div class="ov-villa">'+vn+'</div><div class="ov-type">'+cur().name+'团队 · '+rooms.length+' 间房</div></div><div class="spacer"></div>'
       + '<span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span>'
       + '<div class="ov-stat"><div class="num">'+occ+'<small> / '+cap+'</small></div><div class="lbl">占床</div></div></div>';
     var seg = '<div class="seg"><button class="'+(state.villaDetailMode==='assign'?'active':'')+'" data-mode="assign">房间分配</button>'
@@ -562,7 +591,7 @@
       + '<div class="detail-card"><div class="dc-head">别墅信息</div><div class="villa-info">'
       + '<div class="vi-row"><span class="k">别墅号</span><span class="v">'+vn+'</span></div>'
       + '<div class="vi-row"><span class="k">别墅类型</span><span class="v">别墅 '+vn.charAt(0)+'</span></div>'
-      + '<div class="vi-row"><span class="k">所属全董</span><span class="v">崔雁飞</span></div>'
+      + '<div class="vi-row"><span class="k">所属全董</span><span class="v">'+cur().name+'</span></div>'
       + '<div class="vi-row"><span class="k">占床</span><span class="v">'+occ+' / '+cap+'</span></div>'
       + '<div class="vi-row"><span class="k">分配状态</span><span class="v"><span class="badge '+(full?'full':'notfull')+'">'+(full?'已排满':'未排满')+'</span></span></div>'
       + '</div></div></div>';
@@ -570,17 +599,17 @@
 
   // ===== 右栏 =====
   function renderRight(){
-    var list = state.persons.slice();
+    var list = cur().persons.slice();
     var q = state.personFilter.search.trim();
     if (q) list = list.filter(function(p){ return p.name.indexOf(q) > -1 || p.peer.indexOf(q) > -1; });
     if (state.personFilter.sex !== 'all') list = list.filter(function(p){ return p.sex === state.personFilter.sex; });
     if (state.sortBy === 'rse') list.sort(function(a,b){ return a.rank[0]-b.rank[0] || a.rank[1]-b.rank[1]; });
     else list.sort(function(a,b){ return a.name.localeCompare(b.name, 'zh'); });
 
-    document.getElementById('pendingNum').textContent = state.persons.length;
+    document.getElementById('pendingNum').textContent = cur().persons.length;
     var box = document.getElementById('personList');
     if (!list.length){
-      box.innerHTML = state.persons.length === 0
+      box.innerHTML = cur().persons.length === 0
         ? '<div class="empty-list"><div class="ok">✓</div>所有人员已分配完毕<br>点击右上角「提交分房」</div>'
         : '<div class="empty-list">无匹配结果</div>';
       return;
@@ -609,7 +638,7 @@
 
   // ===== 付款 =====
   function renderPayment(){
-    var list = state.upgrades;
+    var list = cur().upgrades;
     var box = document.getElementById('payList');
     if (!list.length){
       box.innerHTML = '<div class="empty-list">暂无升级单人入住记录</div>';
@@ -625,12 +654,12 @@
 
   // ===== 动作 =====
   function assignPerson(personId, roomId){
-    var p = state.persons.filter(function(x){return x.id===personId;})[0];
-    var r = state.rooms.filter(function(x){return x.id===roomId;})[0];
+    var p = cur().persons.filter(function(x){return x.id===personId;})[0];
+    var r = cur().rooms.filter(function(x){return x.id===roomId;})[0];
     if (!p) { toast('未找到该人员','err'); return; }
     if (r.residents.length >= r.cap) { toast('「'+r.roomNo+'」已满，无法放入','err'); return; }
     if (p.reward && r.roomType !== '浴缸大床') { toast('获奖人员需入住浴缸大床房，请重新选择','err'); return; }
-    state.persons = state.persons.filter(function(x){return x.id!==personId;});
+    cur().persons = cur().persons.filter(function(x){return x.id!==personId;});
     r.residents.push({name:p.name, sex:p.sex});
     if (p.single) r.single = true;
     state.selectedId = null;
@@ -638,30 +667,30 @@
     toast('已将「'+p.name+'」安排入住 '+r.villa+' '+r.roomNo, 'ok');
   }
   function resetRoom(roomId){
-    var r = state.rooms.filter(function(x){return x.id===roomId;})[0];
+    var r = cur().rooms.filter(function(x){return x.id===roomId;})[0];
     if (!r) return;
     if (!r.residents.length && !r.single) return;
     var people = r.residents.map(function(x){ return {name:x.name, sex:x.sex}; });
     r.residents = [];
     r.single = false;
-    state.persons = state.persons.concat(people.map(function(x,i){
+    cur().persons = cur().persons.concat(people.map(function(x,i){
       return { id:'rp'+(Date.now())+i, name:x.name, sex:x.sex, se:'—', rse:'—', rank:[9,9], peer:'—', peerNote:'', canUpgrade:true, single:false, reward:false };
     }));
     renderAll();
     toast('已将 '+r.villa+' '+r.roomNo+' 人员退回待分配', 'err');
   }
   function doUpgrade(id){
-    var p = state.persons.filter(function(x){return x.id===id;})[0];
-    if (p){ p.single = true; p.canUpgrade = false; state.upgradeFee += 3200; state.upgrades.push({ name:p.name, amount:3200 }); }
+    var p = cur().persons.filter(function(x){return x.id===id;})[0];
+    if (p){ p.single = true; p.canUpgrade = false; cur().upgradeFee += 3200; cur().upgrades.push({ name:p.name, amount:3200 }); }
     renderAll();
     toast('已升级单人入住，费用 ￥3200 已计入', 'ok');
   }
   function doCancelUpgrade(id){
-    var p = state.persons.filter(function(x){return x.id===id;})[0];
+    var p = cur().persons.filter(function(x){return x.id===id;})[0];
     if (p){
-      p.single = false; p.canUpgrade = true; state.upgradeFee = Math.max(0, state.upgradeFee - 3200);
-      var idx = state.upgrades.findIndex(function(u){return u.name===p.name;});
-      if (idx > -1) state.upgrades.splice(idx, 1);
+      p.single = false; p.canUpgrade = true; cur().upgradeFee = Math.max(0, cur().upgradeFee - 3200);
+      var idx = cur().upgrades.findIndex(function(u){return u.name===p.name;});
+      if (idx > -1) cur().upgrades.splice(idx, 1);
     }
     renderAll();
     toast('已取消单人入住，退回 ￥3200', 'err');
@@ -674,14 +703,14 @@
     if (card && !e.target.closest('[data-upgrade]') && !e.target.closest('[data-cancel]')){
       state.selectedId = state.selectedId === card.dataset.person ? null : card.dataset.person;
       renderRight();
-      var p = state.persons.filter(function(x){return x.id===state.selectedId;})[0];
+      var p = cur().persons.filter(function(x){return x.id===state.selectedId;})[0];
       document.getElementById('selectHint').innerHTML = p ? '已选中 <b>'+p.name+'</b>，请点目标房间' : '点击人员选中，再点房间放置';
       return;
     }
     var up = e.target.closest('[data-upgrade]');
-    if (up){ upgradeTarget = up.getAttribute('data-upgrade'); var pp=state.persons.filter(function(x){return x.id===upgradeTarget;})[0]; if(pp) document.getElementById('upName').textContent = pp.name; document.getElementById('maskUpgrade').classList.add('show'); return; }
+    if (up){ upgradeTarget = up.getAttribute('data-upgrade'); var pp=cur().persons.filter(function(x){return x.id===upgradeTarget;})[0]; if(pp) document.getElementById('upName').textContent = pp.name; document.getElementById('maskUpgrade').classList.add('show'); return; }
     var cu = e.target.closest('[data-cancel]');
-    if (cu){ cancelTarget = cu.getAttribute('data-cancel'); var cp=state.persons.filter(function(x){return x.id===cancelTarget;})[0]; if(cp) document.getElementById('cuName').textContent = cp.name; document.getElementById('maskCancelUpgrade').classList.add('show'); return; }
+    if (cu){ cancelTarget = cu.getAttribute('data-cancel'); var cp=cur().persons.filter(function(x){return x.id===cancelTarget;})[0]; if(cp) document.getElementById('cuName').textContent = cp.name; document.getElementById('maskCancelUpgrade').classList.add('show'); return; }
     var room = e.target.closest('.room');
     if (room && !e.target.closest('[data-reset]')){
       if (!state.selectedId){ toast('请先在右侧点击选择一名待分配人员','err'); return; }
@@ -731,22 +760,33 @@
   // 返回 / 提交 / 付款
   document.getElementById('btnBack').addEventListener('click', function(){ showView('workbench'); });
   document.getElementById('btnSubmit').addEventListener('click', function(){
-    var pend = state.persons.length;
+    var pend = cur().persons.length;
     var freeVillas = {};
-    state.rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
+    cur().rooms.forEach(function(r){ if (r.residents.length < r.cap) freeVillas[r.villa] = true; });
     if (pend > 0){ toast('还有 '+pend+' 名人员未分配别墅，请分配好后再提交','err'); return; }
     if (Object.keys(freeVillas).length > 1){ toast('您有多套别墅出现空房，请分配好后再提交','err'); return; }
     showView('payment');
   });
   document.getElementById('btnPayBack').addEventListener('click', function(){ showView('workbench'); });
   document.getElementById('btnPayConfirm').addEventListener('click', function(){
-    if (!state.upgrades.length){ toast('没有可付款的升级记录','err'); return; }
-    var total = state.upgrades.reduce(function(s,u){return s+u.amount;},0);
+    if (!cur().upgrades.length){ toast('没有可付款的升级记录','err'); return; }
+    var total = cur().upgrades.reduce(function(s,u){return s+u.amount;},0);
     state.paid = true;
     toast('已提交付款，合计 ￥'+total.toLocaleString()+'（'+state.payMethod+'）', 'ok');
   });
   document.getElementById('btnLogout').addEventListener('click', function(){
     toast('已退出登录「王雨桐」，返回登录页', 'ok');
+  });
+
+  var ownerSel = document.getElementById('ownerSelect');
+  ownerSel.innerHTML = state.owners.map(function(o){ return '<option value="'+o.id+'">'+o.name+' · 全董</option>'; }).join('');
+  ownerSel.value = state.currentOwnerId;
+  ownerSel.addEventListener('change', function(){
+    state.currentOwnerId = this.value;
+    state.currentVillaTab = 'all';
+    state.villaDetailMode = 'assign';
+    state.selectedId = null;
+    renderAll();
   });
 
   renderAll();
